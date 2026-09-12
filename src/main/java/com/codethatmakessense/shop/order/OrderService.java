@@ -39,4 +39,16 @@ public class OrderService {
         order.setTotalCents(total);
         return orders.save(order);
     }
+
+    @Transactional
+    public Order pay(Long orderId, String paymentReference) {
+        Order order = orders.findById(orderId).orElseThrow();
+        if (order.getStatus() != OrderStatus.PLACED) {
+            throw new IllegalStateException("Only a placed order can be paid");
+        }
+        order.setStatus(OrderStatus.PAID);
+        order.setPaidOn(LocalDate.now());
+        order.setPaymentReference(paymentReference);
+        return order;
+    }
 }

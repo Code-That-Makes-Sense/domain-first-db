@@ -32,6 +32,10 @@ public class Order {
 
     private long totalCents;
 
+    private LocalDate paidOn;
+
+    private String paymentReference;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderLine> lines = new ArrayList<>();
 
@@ -73,6 +77,22 @@ public class Order {
 
     public void setTotalCents(long totalCents) {
         this.totalCents = totalCents;
+    }
+
+    public LocalDate getPaidOn() {
+        return paidOn;
+    }
+
+    public void setPaidOn(LocalDate paidOn) {
+        this.paidOn = paidOn;
+    }
+
+    public String getPaymentReference() {
+        return paymentReference;
+    }
+
+    public void setPaymentReference(String paymentReference) {
+        this.paymentReference = paymentReference;
     }
 
     public List<OrderLine> getLines() {

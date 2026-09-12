@@ -32,6 +32,27 @@ class OrderServiceTest {
     }
 
     @Test
+    void paysAPlacedOrder() {
+        Order placed = place();
+
+        orderService.pay(placed.getId(), "PAY-42");
+
+        Order stored = orders.findById(placed.getId()).orElseThrow();
+        assertThat(stored.getStatus()).isEqualTo(OrderStatus.PAID);
+        assertThat(stored.getPaidOn()).isNotNull();
+        assertThat(stored.getPaymentReference()).isEqualTo("PAY-42");
+    }
+
+    @Test
+    void refusesToPayTwice() {
+        Order placed = place();
+        orderService.pay(placed.getId(), "PAY-42");
+
+        assertThatThrownBy(() -> orderService.pay(placed.getId(), "PAY-43"))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
     void rejectsAnOrderWithoutLines() {
         assertThatThrownBy(() -> orderService.place("viktor@example.com", List.of()))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -42,5 +63,11 @@ class OrderServiceTest {
         assertThatThrownBy(() -> orderService.place("viktor@example.com",
                 List.of(new LineRequest("BOOK-1", 0, 1_500))))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    private Order place() {
+        return orderService.place("viktor@example.com", List.of(
+                new LineRequest("BOOK-1", 2, 1_500),
+                new LineRequest("MUG-7", 1, 900)));
     }
 }

@@ -19,11 +19,12 @@ the steps that post walks through.
 
 ## Status
 
-Part 1 is in progress. The latest step is "feat: place orders". The first feature is an order with lines and a total. The JPA entity mirrors the orders table, and the rules live in OrderService.
+Part 1 is in progress. The latest step is "feat: pay for orders". Payment adds two nullable columns, one more status, and one more rule in the service.
 
 The earlier steps of this part:
 
 - chore: bootstrap the Spring Boot project
+- feat: place orders
 
 ## Run it
 
