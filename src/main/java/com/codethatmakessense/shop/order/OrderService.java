@@ -1,0 +1,42 @@
+package com.codethatmakessense.shop.order;
+
+import java.time.LocalDate;
+import java.util.List;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class OrderService {
+
+    private final OrderRepository orders;
+
+    public OrderService(OrderRepository orders) {
+        this.orders = orders;
+    }
+
+    @Transactional
+    public Order place(String customerEmail, List<LineRequest> lines) {
+        if (lines.isEmpty()) {
+            throw new IllegalArgumentException("An order needs at least one line");
+        }
+        Order order = new Order();
+        order.setCustomerEmail(customerEmail);
+        order.setStatus(OrderStatus.PLACED);
+        order.setPlacedOn(LocalDate.now());
+        long total = 0;
+        for (LineRequest request : lines) {
+            if (request.quantity() <= 0) {
+                throw new IllegalArgumentException("Quantity must be positive: " + request.sku());
+            }
+            OrderLine line = new OrderLine();
+            line.setOrder(order);
+            line.setSku(request.sku());
+            line.setQuantity(request.quantity());
+            line.setUnitPriceCents(request.unitPriceCents());
+            order.getLines().add(line);
+            total += request.quantity() * request.unitPriceCents();
+        }
+        order.setTotalCents(total);
+        return orders.save(order);
+    }
+}

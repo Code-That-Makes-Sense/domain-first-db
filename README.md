@@ -19,7 +19,11 @@ the steps that post walks through.
 
 ## Status
 
-Part 1 is in progress. The latest step is "chore: bootstrap the Spring Boot project". The project has Gradle, Java 25, Spring Boot 4 with JPA, Flyway and H2, and one context test. Nothing of the shop exists yet.
+Part 1 is in progress. The latest step is "feat: place orders". The first feature is an order with lines and a total. The JPA entity mirrors the orders table, and the rules live in OrderService.
+
+The earlier steps of this part:
+
+- chore: bootstrap the Spring Boot project
 
 ## Run it
 
@@ -34,5 +38,5 @@ because H2 runs in memory and Flyway creates the schema on start.
 
 ```text
 com.codethatmakessense.shop
-└── ShopApplication   the only class so far
+└── order   the legacy service and the JPA entities that mirror the tables
 ```
