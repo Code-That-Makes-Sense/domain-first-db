@@ -65,6 +65,21 @@ public class OrderService {
         return order;
     }
 
+    @Transactional
+    public Order cancel(Long orderId, String reason) {
+        Order order = orders.findById(orderId).orElseThrow();
+        if (order.getStatus() == OrderStatus.SHIPPED) {
+            throw new IllegalStateException("Cannot cancel a shipped order");
+        }
+        if (order.getStatus() == OrderStatus.CANCELLED) {
+            throw new IllegalStateException("The order is already cancelled");
+        }
+        order.setStatus(OrderStatus.CANCELLED);
+        order.setCancelledOn(LocalDate.now());
+        order.setCancellationReason(reason);
+        return order;
+    }
+
     public boolean isShippable(Order order) {
         return order.getStatus() == OrderStatus.PAID && order.getShippedOn() == null;
     }

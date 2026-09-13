@@ -42,6 +42,10 @@ public class Order {
 
     private String trackingNumber;
 
+    private LocalDate cancelledOn;
+
+    private String cancellationReason;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderLine> lines = new ArrayList<>();
 
@@ -123,6 +127,22 @@ public class Order {
 
     public void setTrackingNumber(String trackingNumber) {
         this.trackingNumber = trackingNumber;
+    }
+
+    public LocalDate getCancelledOn() {
+        return cancelledOn;
+    }
+
+    public void setCancelledOn(LocalDate cancelledOn) {
+        this.cancelledOn = cancelledOn;
+    }
+
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
+
+    public void setCancellationReason(String cancellationReason) {
+        this.cancellationReason = cancellationReason;
     }
 
     public List<OrderLine> getLines() {

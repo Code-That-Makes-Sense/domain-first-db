@@ -19,13 +19,14 @@ the steps that post walks through.
 
 ## Status
 
-Part 1 is in progress. The latest step is "feat: ship orders". Shipping adds three nullable columns. The service decides whether an order is shippable from two fields that have to agree.
+Part 1 is in progress. The latest step is "feat: cancel orders". Cancellation adds two more columns. The guard compares the status with SHIPPED.
 
 The earlier steps of this part:
 
 - chore: bootstrap the Spring Boot project
 - feat: place orders
 - feat: pay for orders
+- feat: ship orders
 
 ## Run it
 

@@ -74,6 +74,29 @@ class OrderServiceTest {
     }
 
     @Test
+    void cancelsAnUnshippedOrder() {
+        Order placed = place();
+        orderService.pay(placed.getId(), "PAY-42");
+
+        orderService.cancel(placed.getId(), "changed my mind");
+
+        Order stored = orders.findById(placed.getId()).orElseThrow();
+        assertThat(stored.getStatus()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(stored.getCancelledOn()).isNotNull();
+        assertThat(stored.getCancellationReason()).isEqualTo("changed my mind");
+    }
+
+    @Test
+    void refusesToCancelAShippedOrder() {
+        Order placed = place();
+        orderService.pay(placed.getId(), "PAY-42");
+        orderService.ship(placed.getId(), "DHL", "TRACK-1");
+
+        assertThatThrownBy(() -> orderService.cancel(placed.getId(), "too late"))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
     void rejectsAnOrderWithoutLines() {
         assertThatThrownBy(() -> orderService.place("viktor@example.com", List.of()))
                 .isInstanceOf(IllegalArgumentException.class);
