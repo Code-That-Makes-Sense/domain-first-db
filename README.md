@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 1 is in progress. The latest step is "feat: reserve stock while an order is open". A second module, stock, arrives. Placing an order reserves stock, cancelling releases it, shipping consumes it.
+Part 1 is in progress. The latest step is "feat: gift wrapping". Gift wrapping adds a flag and a message column that nothing reads.
 
 The earlier steps of this part:
 
@@ -28,6 +28,7 @@ The earlier steps of this part:
 - feat: pay for orders
 - feat: ship orders
 - feat: cancel orders
+- feat: reserve stock while an order is open
 
 ## Run it
 

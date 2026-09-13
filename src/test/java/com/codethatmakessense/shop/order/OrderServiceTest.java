@@ -135,6 +135,16 @@ class OrderServiceTest {
     }
 
     @Test
+    void remembersGiftWrapping() {
+        Order placed = orderService.place("viktor@example.com",
+                List.of(new LineRequest("BOOK-1", 1, 1_500)), true, "Happy reading");
+
+        Order stored = orders.findById(placed.getId()).orElseThrow();
+        assertThat(stored.isGiftWrap()).isTrue();
+        assertThat(stored.getGiftMessage()).isEqualTo("Happy reading");
+    }
+
+    @Test
     void rejectsAnOrderWithoutLines() {
         assertThatThrownBy(() -> orderService.place("viktor@example.com", List.of()))
                 .isInstanceOf(IllegalArgumentException.class);

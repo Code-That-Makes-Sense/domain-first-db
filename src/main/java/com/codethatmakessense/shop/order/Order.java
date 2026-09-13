@@ -46,6 +46,10 @@ public class Order {
 
     private String cancellationReason;
 
+    private boolean giftWrap;
+
+    private String giftMessage;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderLine> lines = new ArrayList<>();
 
@@ -143,6 +147,22 @@ public class Order {
 
     public void setCancellationReason(String cancellationReason) {
         this.cancellationReason = cancellationReason;
+    }
+
+    public boolean isGiftWrap() {
+        return giftWrap;
+    }
+
+    public void setGiftWrap(boolean giftWrap) {
+        this.giftWrap = giftWrap;
+    }
+
+    public String getGiftMessage() {
+        return giftMessage;
+    }
+
+    public void setGiftMessage(String giftMessage) {
+        this.giftMessage = giftMessage;
     }
 
     public List<OrderLine> getLines() {

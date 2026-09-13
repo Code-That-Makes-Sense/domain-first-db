@@ -20,6 +20,11 @@ public class OrderService {
 
     @Transactional
     public Order place(String customerEmail, List<LineRequest> lines) {
+        return place(customerEmail, lines, false, null);
+    }
+
+    @Transactional
+    public Order place(String customerEmail, List<LineRequest> lines, boolean giftWrap, String giftMessage) {
         if (lines.isEmpty()) {
             throw new IllegalArgumentException("An order needs at least one line");
         }
@@ -27,6 +32,8 @@ public class OrderService {
         order.setCustomerEmail(customerEmail);
         order.setStatus(OrderStatus.PLACED);
         order.setPlacedOn(LocalDate.now());
+        order.setGiftWrap(giftWrap);
+        order.setGiftMessage(giftMessage);
         long total = 0;
         for (LineRequest request : lines) {
             if (request.quantity() <= 0) {
