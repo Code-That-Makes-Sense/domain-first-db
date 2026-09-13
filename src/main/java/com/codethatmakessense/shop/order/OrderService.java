@@ -51,4 +51,21 @@ public class OrderService {
         order.setPaymentReference(paymentReference);
         return order;
     }
+
+    @Transactional
+    public Order ship(Long orderId, String carrier, String trackingNumber) {
+        Order order = orders.findById(orderId).orElseThrow();
+        if (!isShippable(order)) {
+            throw new IllegalStateException("Only a paid, unshipped order can be shipped");
+        }
+        order.setStatus(OrderStatus.SHIPPED);
+        order.setShippedOn(LocalDate.now());
+        order.setCarrier(carrier);
+        order.setTrackingNumber(trackingNumber);
+        return order;
+    }
+
+    public boolean isShippable(Order order) {
+        return order.getStatus() == OrderStatus.PAID && order.getShippedOn() == null;
+    }
 }

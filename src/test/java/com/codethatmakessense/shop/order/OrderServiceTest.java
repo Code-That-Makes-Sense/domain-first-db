@@ -53,6 +53,27 @@ class OrderServiceTest {
     }
 
     @Test
+    void shipsAPaidOrder() {
+        Order placed = place();
+        orderService.pay(placed.getId(), "PAY-42");
+
+        orderService.ship(placed.getId(), "DHL", "TRACK-1");
+
+        Order stored = orders.findById(placed.getId()).orElseThrow();
+        assertThat(stored.getStatus()).isEqualTo(OrderStatus.SHIPPED);
+        assertThat(stored.getShippedOn()).isNotNull();
+        assertThat(stored.getTrackingNumber()).isEqualTo("TRACK-1");
+    }
+
+    @Test
+    void refusesToShipAnUnpaidOrder() {
+        Order placed = place();
+
+        assertThatThrownBy(() -> orderService.ship(placed.getId(), "DHL", "TRACK-1"))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
     void rejectsAnOrderWithoutLines() {
         assertThatThrownBy(() -> orderService.place("viktor@example.com", List.of()))
                 .isInstanceOf(IllegalArgumentException.class);

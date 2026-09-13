@@ -36,6 +36,12 @@ public class Order {
 
     private String paymentReference;
 
+    private LocalDate shippedOn;
+
+    private String carrier;
+
+    private String trackingNumber;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderLine> lines = new ArrayList<>();
 
@@ -93,6 +99,30 @@ public class Order {
 
     public void setPaymentReference(String paymentReference) {
         this.paymentReference = paymentReference;
+    }
+
+    public LocalDate getShippedOn() {
+        return shippedOn;
+    }
+
+    public void setShippedOn(LocalDate shippedOn) {
+        this.shippedOn = shippedOn;
+    }
+
+    public String getCarrier() {
+        return carrier;
+    }
+
+    public void setCarrier(String carrier) {
+        this.carrier = carrier;
+    }
+
+    public String getTrackingNumber() {
+        return trackingNumber;
+    }
+
+    public void setTrackingNumber(String trackingNumber) {
+        this.trackingNumber = trackingNumber;
     }
 
     public List<OrderLine> getLines() {

@@ -1,0 +1,3 @@
+ALTER TABLE orders ADD COLUMN shipped_on DATE;
+ALTER TABLE orders ADD COLUMN carrier VARCHAR(64);
+ALTER TABLE orders ADD COLUMN tracking_number VARCHAR(64);
