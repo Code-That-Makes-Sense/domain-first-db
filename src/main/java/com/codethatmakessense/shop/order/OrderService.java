@@ -1,5 +1,6 @@
 package com.codethatmakessense.shop.order;
 
+import com.codethatmakessense.shop.stock.StockService;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -10,8 +11,11 @@ public class OrderService {
 
     private final OrderRepository orders;
 
-    public OrderService(OrderRepository orders) {
+    private final StockService stock;
+
+    public OrderService(OrderRepository orders, StockService stock) {
         this.orders = orders;
+        this.stock = stock;
     }
 
     @Transactional
@@ -28,6 +32,7 @@ public class OrderService {
             if (request.quantity() <= 0) {
                 throw new IllegalArgumentException("Quantity must be positive: " + request.sku());
             }
+            stock.reserve(request.sku(), request.quantity());
             OrderLine line = new OrderLine();
             line.setOrder(order);
             line.setSku(request.sku());
@@ -58,6 +63,9 @@ public class OrderService {
         if (!isShippable(order)) {
             throw new IllegalStateException("Only a paid, unshipped order can be shipped");
         }
+        for (OrderLine line : order.getLines()) {
+            stock.consume(line.getSku(), line.getQuantity());
+        }
         order.setStatus(OrderStatus.SHIPPED);
         order.setShippedOn(LocalDate.now());
         order.setCarrier(carrier);
@@ -73,6 +81,9 @@ public class OrderService {
         }
         if (order.getStatus() == OrderStatus.CANCELLED) {
             throw new IllegalStateException("The order is already cancelled");
+        }
+        for (OrderLine line : order.getLines()) {
+            stock.release(line.getSku(), line.getQuantity());
         }
         order.setStatus(OrderStatus.CANCELLED);
         order.setCancelledOn(LocalDate.now());

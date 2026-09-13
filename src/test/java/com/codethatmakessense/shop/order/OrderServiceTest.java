@@ -3,7 +3,9 @@ package com.codethatmakessense.shop.order;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.codethatmakessense.shop.stock.StockService;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +20,15 @@ class OrderServiceTest {
 
     @Autowired
     OrderRepository orders;
+
+    @Autowired
+    StockService stock;
+
+    @BeforeEach
+    void stockTheShelves() {
+        stock.receive("BOOK-1", 10);
+        stock.receive("MUG-7", 5);
+    }
 
     @Test
     void placesAnOrderWithItsLinesAndTotal() {
@@ -93,6 +104,33 @@ class OrderServiceTest {
         orderService.ship(placed.getId(), "DHL", "TRACK-1");
 
         assertThatThrownBy(() -> orderService.cancel(placed.getId(), "too late"))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void reservesStockWhenPlacingAndReleasesItWhenCancelling() {
+        Order placed = place();
+        assertThat(stock.available("BOOK-1")).isEqualTo(8);
+
+        orderService.cancel(placed.getId(), "changed my mind");
+
+        assertThat(stock.available("BOOK-1")).isEqualTo(10);
+    }
+
+    @Test
+    void consumesStockWhenShipping() {
+        Order placed = place();
+        orderService.pay(placed.getId(), "PAY-42");
+
+        orderService.ship(placed.getId(), "DHL", "TRACK-1");
+
+        assertThat(stock.available("BOOK-1")).isEqualTo(8);
+    }
+
+    @Test
+    void refusesAnOrderTheStockCannotCover() {
+        assertThatThrownBy(() -> orderService.place("viktor@example.com",
+                List.of(new LineRequest("MUG-7", 6, 900))))
                 .isInstanceOf(IllegalStateException.class);
     }
 

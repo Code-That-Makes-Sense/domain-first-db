@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 1 is in progress. The latest step is "feat: cancel orders". Cancellation adds two more columns. The guard compares the status with SHIPPED.
+Part 1 is in progress. The latest step is "feat: reserve stock while an order is open". A second module, stock, arrives. Placing an order reserves stock, cancelling releases it, shipping consumes it.
 
 The earlier steps of this part:
 
@@ -27,6 +27,7 @@ The earlier steps of this part:
 - feat: place orders
 - feat: pay for orders
 - feat: ship orders
+- feat: cancel orders
 
 ## Run it
 
@@ -41,5 +42,6 @@ because H2 runs in memory and Flyway creates the schema on start.
 
 ```text
 com.codethatmakessense.shop
-└── order   the legacy service and the JPA entities that mirror the tables
+├── order   the legacy service and the JPA entities that mirror the tables
+└── stock   reserve, release and consume stock
 ```
