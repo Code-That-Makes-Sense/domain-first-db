@@ -53,6 +53,9 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderLine> lines = new ArrayList<>();
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Shipment> shipments = new ArrayList<>();
+
     public Long getId() {
         return id;
     }
@@ -171,5 +174,13 @@ public class Order {
 
     public void setLines(List<OrderLine> lines) {
         this.lines = lines;
+    }
+
+    public List<Shipment> getShipments() {
+        return shipments;
+    }
+
+    public void setShipments(List<Shipment> shipments) {
+        this.shipments = shipments;
     }
 }

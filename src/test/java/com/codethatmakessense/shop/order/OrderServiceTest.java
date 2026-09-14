@@ -145,6 +145,37 @@ class OrderServiceTest {
     }
 
     @Test
+    void shipsPartOfAnOrderAndKeepsTheRestOpen() {
+        Order placed = place();
+        orderService.pay(placed.getId(), "PAY-42");
+
+        orderService.ship(placed.getId(), "DHL", "TRACK-1",
+                List.of(new ShipmentRequest("BOOK-1", 2)));
+
+        Order stored = orders.findById(placed.getId()).orElseThrow();
+        assertThat(stored.getStatus()).isEqualTo(OrderStatus.PARTIALLY_SHIPPED);
+        assertThat(stored.getShipments()).hasSize(1);
+        assertThat(orderService.isShippable(stored)).isTrue();
+
+        orderService.ship(placed.getId(), "DHL", "TRACK-2",
+                List.of(new ShipmentRequest("MUG-7", 1)));
+
+        assertThat(stored.getStatus()).isEqualTo(OrderStatus.SHIPPED);
+        assertThat(stored.getShipments()).hasSize(2);
+        assertThat(stored.getTrackingNumber()).isEqualTo("TRACK-1");
+    }
+
+    @Test
+    void refusesToShipMoreThanOrdered() {
+        Order placed = place();
+        orderService.pay(placed.getId(), "PAY-42");
+
+        assertThatThrownBy(() -> orderService.ship(placed.getId(), "DHL", "TRACK-1",
+                List.of(new ShipmentRequest("BOOK-1", 3))))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
     void rejectsAnOrderWithoutLines() {
         assertThatThrownBy(() -> orderService.place("viktor@example.com", List.of()))
                 .isInstanceOf(IllegalArgumentException.class);

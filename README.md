@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 1 is in progress. The latest step is "feat: gift wrapping". Gift wrapping adds a flag and a message column that nothing reads.
+Part 1 is in progress. The latest step is "feat: partial shipments". Shipments get their own table, and the old shipping columns stay. The service computes "fully shipped" by comparing lines. The cancel guard did not change, so a partially shipped order can still be cancelled.
 
 The earlier steps of this part:
 
@@ -29,6 +29,7 @@ The earlier steps of this part:
 - feat: ship orders
 - feat: cancel orders
 - feat: reserve stock while an order is open
+- feat: gift wrapping
 
 ## Run it
 

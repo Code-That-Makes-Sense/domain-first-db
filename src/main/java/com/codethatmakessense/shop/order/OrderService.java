@@ -2,6 +2,7 @@ package com.codethatmakessense.shop.order;
 
 import com.codethatmakessense.shop.stock.StockService;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,16 +68,47 @@ public class OrderService {
     @Transactional
     public Order ship(Long orderId, String carrier, String trackingNumber) {
         Order order = orders.findById(orderId).orElseThrow();
-        if (!isShippable(order)) {
-            throw new IllegalStateException("Only a paid, unshipped order can be shipped");
-        }
+        List<ShipmentRequest> everything = new ArrayList<>();
         for (OrderLine line : order.getLines()) {
-            stock.consume(line.getSku(), line.getQuantity());
+            everything.add(new ShipmentRequest(line.getSku(), line.getQuantity()));
         }
-        order.setStatus(OrderStatus.SHIPPED);
-        order.setShippedOn(LocalDate.now());
-        order.setCarrier(carrier);
-        order.setTrackingNumber(trackingNumber);
+        return ship(orderId, carrier, trackingNumber, everything);
+    }
+
+    @Transactional
+    public Order ship(Long orderId, String carrier, String trackingNumber, List<ShipmentRequest> requests) {
+        Order order = orders.findById(orderId).orElseThrow();
+        if (!isShippable(order)) {
+            throw new IllegalStateException("Only a paid order with something left to ship can be shipped");
+        }
+        Shipment shipment = new Shipment();
+        shipment.setOrder(order);
+        shipment.setShippedOn(LocalDate.now());
+        shipment.setCarrier(carrier);
+        shipment.setTrackingNumber(trackingNumber);
+        for (ShipmentRequest request : requests) {
+            int remaining = remainingToShip(order, request.sku());
+            if (request.quantity() > remaining) {
+                throw new IllegalStateException("Cannot ship more than ordered: " + request.sku());
+            }
+            ShipmentLine line = new ShipmentLine();
+            line.setShipment(shipment);
+            line.setSku(request.sku());
+            line.setQuantity(request.quantity());
+            shipment.getLines().add(line);
+            stock.consume(request.sku(), request.quantity());
+        }
+        order.getShipments().add(shipment);
+        if (order.getShippedOn() == null) {
+            order.setShippedOn(shipment.getShippedOn());
+            order.setCarrier(carrier);
+            order.setTrackingNumber(trackingNumber);
+        }
+        if (isFullyShipped(order)) {
+            order.setStatus(OrderStatus.SHIPPED);
+        } else {
+            order.setStatus(OrderStatus.PARTIALLY_SHIPPED);
+        }
         return order;
     }
 
@@ -99,6 +131,35 @@ public class OrderService {
     }
 
     public boolean isShippable(Order order) {
-        return order.getStatus() == OrderStatus.PAID && order.getShippedOn() == null;
+        boolean paidOrPartial = order.getStatus() == OrderStatus.PAID
+                || order.getStatus() == OrderStatus.PARTIALLY_SHIPPED;
+        return paidOrPartial && !isFullyShipped(order);
+    }
+
+    public boolean isFullyShipped(Order order) {
+        for (OrderLine line : order.getLines()) {
+            if (remainingToShip(order, line.getSku()) > 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int remainingToShip(Order order, String sku) {
+        int ordered = 0;
+        for (OrderLine line : order.getLines()) {
+            if (line.getSku().equals(sku)) {
+                ordered += line.getQuantity();
+            }
+        }
+        int shipped = 0;
+        for (Shipment shipment : order.getShipments()) {
+            for (ShipmentLine line : shipment.getLines()) {
+                if (line.getSku().equals(sku)) {
+                    shipped += line.getQuantity();
+                }
+            }
+        }
+        return ordered - shipped;
     }
 }
