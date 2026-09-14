@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 1 is in progress. The latest step is "feat: daily sales report". The daily sales report is a grouped query written with JdbcClient.
+Part 1 is complete. The latest step is "feat: expose the shop over HTTP". Controllers for orders, stock and the report, an exception mapper, and http/shop.http to drive them. The legacy application is complete.
 
 The earlier steps of this part:
 
@@ -31,6 +31,9 @@ The earlier steps of this part:
 - feat: reserve stock while an order is open
 - feat: gift wrapping
 - feat: partial shipments
+- feat: daily sales report
+
+The tag `part-1` points here.
 
 ## Run it
 
@@ -39,6 +42,19 @@ because H2 runs in memory and Flyway creates the schema on start.
 
 ```sh
 ./gradlew test       # everything
+./gradlew bootRun    # the shop on port 8080
+```
+
+With the app running, `http/shop.http` walks an order from stock receipt to
+shipment.
+
+The files use the JetBrains HTTP Client format. You can open them in IntelliJ with
+the `dev` environment selected, or run them from a terminal with the
+[HTTP Client CLI](https://www.jetbrains.com/help/idea/http-client-cli.html),
+which you get with `brew install ijhttp`:
+
+```sh
+ijhttp --env-file http/http-client.env.json --env dev http/shop.http
 ```
 
 ## Layout now
@@ -48,4 +64,6 @@ com.codethatmakessense.shop
 ├── order    the legacy service and the JPA entities that mirror the tables
 ├── stock    reserve, release and consume stock
 └── report   read-only reports
+
+http/        the request files for the HTTP Client
 ```

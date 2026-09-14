@@ -1,0 +1,51 @@
+### Put ten books on the shelf
+POST {{host}}/stock/BOOK-1/receipts
+Content-Type: application/json
+
+{ "quantity": 10 }
+
+### Place an order for two of them
+POST {{host}}/orders
+Content-Type: application/json
+
+{
+  "customerEmail": "viktor@example.com",
+  "lines": [ { "sku": "BOOK-1", "quantity": 2, "unitPriceCents": 1500 } ],
+  "giftWrap": false,
+  "giftMessage": null
+}
+
+> {% client.global.set("orderId", response.body.id); %}
+
+### Pay for it
+POST {{host}}/orders/{{orderId}}/payment
+Content-Type: application/json
+
+{ "reference": "PAY-42" }
+
+### Ship one of the two books
+POST {{host}}/orders/{{orderId}}/shipments
+Content-Type: application/json
+
+{ "carrier": "DHL", "trackingNumber": "TRACK-1", "lines": [ { "sku": "BOOK-1", "quantity": 1 } ] }
+
+### Ship the rest
+POST {{host}}/orders/{{orderId}}/shipments
+Content-Type: application/json
+
+{ "carrier": "DHL", "trackingNumber": "TRACK-2", "lines": [] }
+
+### Try to cancel a shipped order (409)
+POST {{host}}/orders/{{orderId}}/cancellation
+Content-Type: application/json
+
+{ "reason": "changed my mind" }
+
+### Look at the order
+GET {{host}}/orders/{{orderId}}
+
+### What is left on the shelf
+GET {{host}}/stock/BOOK-1
+
+### Today's sales
+GET {{host}}/reports/sales
