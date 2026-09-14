@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 1 is in progress. The latest step is "feat: partial shipments". Shipments get their own table, and the old shipping columns stay. The service computes "fully shipped" by comparing lines. The cancel guard did not change, so a partially shipped order can still be cancelled.
+Part 1 is in progress. The latest step is "feat: daily sales report". The daily sales report is a grouped query written with JdbcClient.
 
 The earlier steps of this part:
 
@@ -30,6 +30,7 @@ The earlier steps of this part:
 - feat: cancel orders
 - feat: reserve stock while an order is open
 - feat: gift wrapping
+- feat: partial shipments
 
 ## Run it
 
@@ -44,6 +45,7 @@ because H2 runs in memory and Flyway creates the schema on start.
 
 ```text
 com.codethatmakessense.shop
-├── order   the legacy service and the JPA entities that mirror the tables
-└── stock   reserve, release and consume stock
+├── order    the legacy service and the JPA entities that mirror the tables
+├── stock    reserve, release and consume stock
+└── report   read-only reports
 ```
