@@ -7,14 +7,16 @@ public class ReturnRequest {
 
     public static final Period RETURN_WINDOW = Period.ofDays(30);
 
+    private final ReturnId id;
     private final Quantity quantity;
     private final LocalDate requestedOn;
     private final LocalDate shippedOn;
     private final Money refund;
     private ReturnStatus status;
 
-    private ReturnRequest(Quantity quantity, LocalDate requestedOn, LocalDate shippedOn, Money refund,
+    private ReturnRequest(ReturnId id, Quantity quantity, LocalDate requestedOn, LocalDate shippedOn, Money refund,
             ReturnStatus status) {
+        this.id = id;
         this.quantity = quantity;
         this.requestedOn = requestedOn;
         this.shippedOn = shippedOn;
@@ -22,7 +24,7 @@ public class ReturnRequest {
         this.status = status;
     }
 
-    public static ReturnRequest request(ShippedItem shipped, Quantity quantity, LocalDate requestedOn) {
+    public static ReturnRequest request(ReturnId id, ShippedItem shipped, Quantity quantity, LocalDate requestedOn) {
         if (quantity.isNone()) {
             throw new ReturnNotAllowed("Nothing to return");
         }
@@ -33,7 +35,7 @@ public class ReturnRequest {
             throw new ReturnNotAllowed("Only " + shipped.quantity().value() + " of " + shipped.sku().value() + " shipped");
         }
         Money refund = shipped.unitPrice().times(quantity);
-        return new ReturnRequest(quantity, requestedOn, shipped.shippedOn(), refund, ReturnStatus.REQUESTED);
+        return new ReturnRequest(id, quantity, requestedOn, shipped.shippedOn(), refund, ReturnStatus.REQUESTED);
     }
 
     public void approve() {
@@ -57,6 +59,10 @@ public class ReturnRequest {
             throw new ReturnNotAllowed("A " + status + " return cannot become " + to);
         }
         status = to;
+    }
+
+    public ReturnId id() {
+        return id;
     }
 
     public Quantity quantity() {

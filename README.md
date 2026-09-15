@@ -19,12 +19,13 @@ the steps that post walks through.
 
 ## Status
 
-Part 2 is in progress. The latest step is "feat(returns): close the return window after thirty days". A return has to be requested within 30 days of the shipment. The request keeps the requested date and the shipment date.
+Part 2 is in progress. The latest step is "feat(returns): let the domain own its ports". The domain owns two ports, ReturnRequestRepository and ShippedItems. ReturnId identifies a request, so the repository can find it again.
 
 The earlier steps of this part:
 
 - feat(returns): name the five things a return request does
 - feat(returns): refund what comes back at the price it shipped
+- feat(returns): close the return window after thirty days
 
 ## Run it
 
