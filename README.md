@@ -8,8 +8,8 @@ builds, and its tests pass. Read it in order.
 
 ## The plan
 
-1. **Part 1, the legacy webshop** (in progress). We build the webshop the way most teams do, database first. The entities mirror the tables, the rules live in services, every feature adds a migration, and every test boots Spring and H2. At the end we expose it over HTTP, so you can try it.
-2. **Part 2, a module built domain-first** (not started). We add the next feature, returns, the other way round and inside the same application. Behavior comes first, the domain owns its ports, the use cases run on in-memory adapters, and the schema comes last.
+1. **Part 1, the legacy webshop** (done, tag `part-1`). We build the webshop the way most teams do, database first. The entities mirror the tables, the rules live in services, every feature adds a migration, and every test boots Spring and H2. At the end we expose it over HTTP, so you can try it.
+2. **Part 2, a module built domain-first** (in progress). We add the next feature, returns, the other way round and inside the same application. Behavior comes first, the domain owns its ports, the use cases run on in-memory adapters, and the schema comes last.
 3. **Part 3, the legacy module migrated** (not started). We strangle the order module onto an aggregate, one method at a time, on the tables it already has. There is no rewrite and no dual write. The schema contracts afterwards.
 4. **Part 4, the tests and the numbers** (not started). We retire the tests that boot the world, turn the architecture into a build rule, split the fast suite from the full one, and measure.
 
@@ -19,21 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 1 is complete. The latest step is "feat: expose the shop over HTTP". Controllers for orders, stock and the report, an exception mapper, and http/shop.http to drive them. The legacy application is complete.
-
-The earlier steps of this part:
-
-- chore: bootstrap the Spring Boot project
-- feat: place orders
-- feat: pay for orders
-- feat: ship orders
-- feat: cancel orders
-- feat: reserve stock while an order is open
-- feat: gift wrapping
-- feat: partial shipments
-- feat: daily sales report
-
-The tag `part-1` points here.
+Part 2 is in progress. The latest step is "feat(returns): model a return request from its behavior". The returns module starts the other way round. The ReturnRequest aggregate and its rules come first, with unit tests that need no Spring context.
 
 ## Run it
 
@@ -61,9 +47,11 @@ ijhttp --env-file http/http-client.env.json --env dev http/shop.http
 
 ```text
 com.codethatmakessense.shop
-├── order    the legacy service and the JPA entities that mirror the tables
-├── stock    reserve, release and consume stock
-└── report   read-only reports
+├── order        the legacy service and the JPA entities that mirror the tables
+├── returns      the Spring configuration of the module
+│   └── domain   the ReturnRequest aggregate and the ports
+├── stock        reserve, release and consume stock
+└── report       read-only reports
 
-http/        the request files for the HTTP Client
+http/            the request files for the HTTP Client
 ```
