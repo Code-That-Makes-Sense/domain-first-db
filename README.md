@@ -19,11 +19,12 @@ the steps that post walks through.
 
 ## Status
 
-Part 2 is in progress. The latest step is "feat(returns): refund what comes back at the price it shipped". request takes what shipped and how much comes back. The refund is the unit price times the quantity, and a request for more than what shipped is refused.
+Part 2 is in progress. The latest step is "feat(returns): close the return window after thirty days". A return has to be requested within 30 days of the shipment. The request keeps the requested date and the shipment date.
 
 The earlier steps of this part:
 
 - feat(returns): name the five things a return request does
+- feat(returns): refund what comes back at the price it shipped
 
 ## Run it
 
