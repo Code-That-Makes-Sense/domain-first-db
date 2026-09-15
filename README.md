@@ -19,7 +19,11 @@ the steps that post walks through.
 
 ## Status
 
-Part 2 is in progress. The latest step is "feat(returns): model a return request from its behavior". The returns module starts the other way round. The ReturnRequest aggregate and its rules come first, with unit tests that need no Spring context.
+Part 2 is in progress. The latest step is "feat(returns): let the domain own its ports". The domain owns two ports, ReturnRequestRepository and ShippedItems.
+
+The earlier steps of this part:
+
+- feat(returns): model a return request from its behavior
 
 ## Run it
 
