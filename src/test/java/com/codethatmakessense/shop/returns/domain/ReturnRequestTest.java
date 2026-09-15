@@ -15,24 +15,24 @@ class ReturnRequestTest {
     @Test
     void refundsThePriceOfWhatComesBack() {
         ReturnRequest request = ReturnRequest.request(
-                ReturnId.next(), TWO_BOOKS, new Quantity(2), SHIPPED_ON.plusDays(3));
+                ReturnId.next(), TWO_BOOKS, Quantity.NONE, new Quantity(2), SHIPPED_ON.plusDays(3));
 
         assertThat(request.status()).isEqualTo(ReturnStatus.REQUESTED);
         assertThat(request.refundAmount()).isEqualTo(new Money(3_000));
     }
 
     @Test
-    void refusesMoreThanWhatShipped() {
+    void refusesMoreThanWhatShippedMinusWhatCameBackAlready() {
         assertThatThrownBy(() -> ReturnRequest.request(
-                ReturnId.next(), TWO_BOOKS, new Quantity(3), SHIPPED_ON.plusDays(3)))
+                ReturnId.next(), TWO_BOOKS, new Quantity(1), new Quantity(2), SHIPPED_ON.plusDays(3)))
                 .isInstanceOf(ReturnNotAllowed.class)
-                .hasMessageContaining("Only 2");
+                .hasMessageContaining("Only 1");
     }
 
     @Test
     void refusesAReturnAfterThirtyDays() {
         assertThatThrownBy(() -> ReturnRequest.request(
-                ReturnId.next(), TWO_BOOKS, new Quantity(1), SHIPPED_ON.plusDays(31)))
+                ReturnId.next(), TWO_BOOKS, Quantity.NONE, new Quantity(1), SHIPPED_ON.plusDays(31)))
                 .isInstanceOf(ReturnNotAllowed.class)
                 .hasMessageContaining("window");
     }
@@ -40,7 +40,7 @@ class ReturnRequestTest {
     @Test
     void acceptsAReturnOnTheLastDayOfTheWindow() {
         ReturnRequest request = ReturnRequest.request(
-                ReturnId.next(), TWO_BOOKS, new Quantity(1), SHIPPED_ON.plusDays(30));
+                ReturnId.next(), TWO_BOOKS, Quantity.NONE, new Quantity(1), SHIPPED_ON.plusDays(30));
 
         assertThat(request.status()).isEqualTo(ReturnStatus.REQUESTED);
     }
@@ -48,7 +48,7 @@ class ReturnRequestTest {
     @Test
     void refusesToReturnNothing() {
         assertThatThrownBy(() -> ReturnRequest.request(
-                ReturnId.next(), TWO_BOOKS, Quantity.NONE, SHIPPED_ON))
+                ReturnId.next(), TWO_BOOKS, Quantity.NONE, Quantity.NONE, SHIPPED_ON))
                 .isInstanceOf(ReturnNotAllowed.class);
     }
 
@@ -61,6 +61,16 @@ class ReturnRequestTest {
         request.refund();
 
         assertThat(request.status()).isEqualTo(ReturnStatus.REFUNDED);
+    }
+
+    @Test
+    void aRejectedRequestStopsCountingAsReturned() {
+        ReturnRequest request = requested();
+
+        request.reject();
+
+        assertThat(request.status()).isEqualTo(ReturnStatus.REJECTED);
+        assertThat(request.countsAsReturned()).isFalse();
     }
 
     @Test
@@ -80,6 +90,6 @@ class ReturnRequestTest {
     }
 
     private static ReturnRequest requested() {
-        return ReturnRequest.request(ReturnId.next(), TWO_BOOKS, new Quantity(1), SHIPPED_ON.plusDays(1));
+        return ReturnRequest.request(ReturnId.next(), TWO_BOOKS, Quantity.NONE, new Quantity(1), SHIPPED_ON.plusDays(1));
     }
 }

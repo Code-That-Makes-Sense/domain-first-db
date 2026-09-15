@@ -26,15 +26,17 @@ public class ReturnRequest {
         this.status = status;
     }
 
-    public static ReturnRequest request(ReturnId id, ShippedItem shipped, Quantity quantity, LocalDate requestedOn) {
+    public static ReturnRequest request(ReturnId id, ShippedItem shipped, Quantity alreadyReturned,
+            Quantity quantity, LocalDate requestedOn) {
         if (quantity.isNone()) {
             throw new ReturnNotAllowed("Nothing to return");
         }
         if (requestedOn.isAfter(shipped.shippedOn().plus(RETURN_WINDOW))) {
             throw new ReturnNotAllowed("The return window closed on " + shipped.shippedOn().plus(RETURN_WINDOW));
         }
-        if (quantity.exceeds(shipped.quantity())) {
-            throw new ReturnNotAllowed("Only " + shipped.quantity().value() + " of " + shipped.sku().value() + " shipped");
+        Quantity returnable = shipped.quantity().minus(alreadyReturned);
+        if (quantity.exceeds(returnable)) {
+            throw new ReturnNotAllowed("Only " + returnable.value() + " of " + shipped.sku().value() + " can still be returned");
         }
         Money refund = shipped.unitPrice().times(quantity);
         return new ReturnRequest(id, shipped.orderId(), shipped.sku(), quantity, requestedOn, refund, ReturnStatus.REQUESTED);
@@ -59,6 +61,10 @@ public class ReturnRequest {
 
     public void refund() {
         transition(ReturnStatus.RECEIVED, ReturnStatus.REFUNDED);
+    }
+
+    public boolean countsAsReturned() {
+        return status != ReturnStatus.REJECTED;
     }
 
     private void transition(ReturnStatus from, ReturnStatus to) {

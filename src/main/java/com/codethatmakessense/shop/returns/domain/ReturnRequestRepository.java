@@ -7,4 +7,6 @@ public interface ReturnRequestRepository {
     Optional<ReturnRequest> findById(ReturnId id);
 
     void save(ReturnRequest request);
+
+    Quantity alreadyReturned(OrderId orderId, Sku sku);
 }
