@@ -19,13 +19,14 @@ the steps that post walks through.
 
 ## Status
 
-Part 2 is in progress. The latest step is "feat(returns): let the domain own its ports". The domain owns two ports, ReturnRequestRepository and ShippedItems. ReturnId identifies a request, so the repository can find it again.
+Part 2 is in progress. The latest step is "feat(returns): run the use cases over in-memory adapters". ReturnService runs the use cases on an in-memory repository and a stub. The whole flow works without a database.
 
 The earlier steps of this part:
 
 - feat(returns): name the five things a return request does
 - feat(returns): refund what comes back at the price it shipped
 - feat(returns): close the return window after thirty days
+- feat(returns): let the domain own its ports
 
 ## Run it
 
@@ -53,11 +54,14 @@ ijhttp --env-file http/http-client.env.json --env dev http/shop.http
 
 ```text
 com.codethatmakessense.shop
-├── order        the legacy service and the JPA entities that mirror the tables
-├── returns      the Spring configuration of the module
-│   └── domain   the ReturnRequest aggregate and the ports
-├── stock        reserve, release and consume stock
-└── report       read-only reports
+├── order             the legacy service and the JPA entities that mirror the tables
+├── returns           the Spring configuration of the module
+│   ├── domain        the ReturnRequest aggregate and the ports
+│   ├── application   ReturnService
+│   └── adapter
+│       └── memory    the in-memory repository the use cases run on
+├── stock             reserve, release and consume stock
+└── report            read-only reports
 
-http/            the request files for the HTTP Client
+http/                 the request files for the HTTP Client
 ```
