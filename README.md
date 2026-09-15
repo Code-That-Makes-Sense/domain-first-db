@@ -19,7 +19,11 @@ the steps that post walks through.
 
 ## Status
 
-Part 2 is in progress. The latest step is "feat(returns): name the five things a return request does". The returns module starts the other way round. ReturnRequest has five methods and one field, the status, with unit tests that need no Spring context.
+Part 2 is in progress. The latest step is "feat(returns): refund what comes back at the price it shipped". request takes what shipped and how much comes back. The refund is the unit price times the quantity, and a request for more than what shipped is refused.
+
+The earlier steps of this part:
+
+- feat(returns): name the five things a return request does
 
 ## Run it
 
