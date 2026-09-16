@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 2 is in progress. The latest step is "feat(returns): answer ShippedItems from the legacy order tables". LegacyShippedItems answers the ShippedItems port from the legacy order tables.
+Part 2 is in progress. The latest step is "feat(returns): derive the schema from the model". V8 is written from the model. ReturnRequestRow and JpaReturnRequestRepository arrive with a contract test that both adapters pass.
 
 The earlier steps of this part:
 
@@ -28,6 +28,7 @@ The earlier steps of this part:
 - feat(returns): run the use cases over in-memory adapters
 - fix(returns): count earlier returns of the same item
 - test(returns): guard the domain boundary with ArchUnit
+- feat(returns): answer ShippedItems from the legacy order tables
 
 ## Run it
 
@@ -61,6 +62,7 @@ com.codethatmakessense.shop
 │   ├── application   ReturnService
 │   └── adapter
 │       ├── memory    the in-memory repository the use cases run on
+│       ├── jpa       the row and the JPA adapter
 │       └── legacy    reads the legacy order tables for the ShippedItems port
 ├── stock             reserve, release and consume stock
 └── report            read-only reports
@@ -70,3 +72,9 @@ http/                 the request files for the HTTP Client
 
 The domain and application packages import no framework. An ArchUnit test fails
 the build if that changes.
+
+## Your turn
+
+Fork the repo and pick one.
+
+- Rewrite `JpaReturnRequestRepository` with `JdbcClient`. The contract test tells you when you are done. The domain does not notice the change.
