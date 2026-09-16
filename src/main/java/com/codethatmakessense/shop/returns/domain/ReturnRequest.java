@@ -12,18 +12,16 @@ public class ReturnRequest {
     private final Sku sku;
     private final Quantity quantity;
     private final LocalDate requestedOn;
-    private final LocalDate shippedOn;
     private final Money refund;
     private ReturnStatus status;
 
     private ReturnRequest(ReturnId id, OrderId orderId, Sku sku, Quantity quantity,
-            LocalDate requestedOn, LocalDate shippedOn, Money refund, ReturnStatus status) {
+            LocalDate requestedOn, Money refund, ReturnStatus status) {
         this.id = id;
         this.orderId = orderId;
         this.sku = sku;
         this.quantity = quantity;
         this.requestedOn = requestedOn;
-        this.shippedOn = shippedOn;
         this.refund = refund;
         this.status = status;
     }
@@ -41,8 +39,7 @@ public class ReturnRequest {
             throw new ReturnNotAllowed("Only " + returnable.value() + " of " + shipped.sku().value() + " can still be returned");
         }
         Money refund = shipped.unitPrice().times(quantity);
-        return new ReturnRequest(id, shipped.orderId(), shipped.sku(), quantity, requestedOn, shipped.shippedOn(), refund,
-                ReturnStatus.REQUESTED);
+        return new ReturnRequest(id, shipped.orderId(), shipped.sku(), quantity, requestedOn, refund, ReturnStatus.REQUESTED);
     }
 
     public void approve() {
@@ -90,10 +87,6 @@ public class ReturnRequest {
 
     public LocalDate requestedOn() {
         return requestedOn;
-    }
-
-    public LocalDate shippedOn() {
-        return shippedOn;
     }
 
     public Money refundAmount() {

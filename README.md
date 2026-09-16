@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 2 is in progress. The latest step is "feat(returns): answer ShippedItems from the legacy order tables". LegacyShippedItems answers the ShippedItems port from the legacy order tables.
+Part 2 is in progress. The latest step is "refactor(returns): drop the shipment date, the order module owns it". The shipment date leaves ReturnRequest. The window rule reads it once, at request time, and the shipment owns it. No test changed.
 
 The earlier steps of this part:
 
@@ -30,6 +30,7 @@ The earlier steps of this part:
 - feat(returns): run the use cases over in-memory adapters
 - fix(returns): count earlier returns of the same item
 - test(returns): guard the domain boundary with ArchUnit
+- feat(returns): answer ShippedItems from the legacy order tables
 
 ## Run it
 
