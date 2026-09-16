@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 2 is in progress. The latest step is "test(returns): guard the domain boundary with ArchUnit". An ArchUnit rule checks that nothing in returns.domain and returns.application imports a framework.
+Part 2 is in progress. The latest step is "feat(returns): answer ShippedItems from the legacy order tables". LegacyShippedItems answers the ShippedItems port from the legacy order tables.
 
 The earlier steps of this part:
 
@@ -27,6 +27,7 @@ The earlier steps of this part:
 - feat(returns): let the domain own its ports
 - feat(returns): run the use cases over in-memory adapters
 - fix(returns): count earlier returns of the same item
+- test(returns): guard the domain boundary with ArchUnit
 
 ## Run it
 
@@ -59,7 +60,8 @@ com.codethatmakessense.shop
 │   ├── domain        the ReturnRequest aggregate and the ports
 │   ├── application   ReturnService
 │   └── adapter
-│       └── memory    the in-memory repository the use cases run on
+│       ├── memory    the in-memory repository the use cases run on
+│       └── legacy    reads the legacy order tables for the ShippedItems port
 ├── stock             reserve, release and consume stock
 └── report            read-only reports
 
