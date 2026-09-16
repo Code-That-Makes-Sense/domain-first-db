@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 2 is in progress. The latest step is "feat(returns): run the use cases over in-memory adapters". ReturnService runs the use cases on an in-memory repository and a stub. The whole flow works without a database.
+Part 2 is in progress. The latest step is "fix(returns): count earlier returns of the same item". A second return of the same item was allowed past what shipped. The use-case test caught it. The fix adds what already came back to the factory, the port and the in-memory adapter.
 
 The earlier steps of this part:
 
@@ -27,6 +27,7 @@ The earlier steps of this part:
 - feat(returns): refund what comes back at the price it shipped
 - feat(returns): close the return window after thirty days
 - feat(returns): let the domain own its ports
+- feat(returns): run the use cases over in-memory adapters
 
 ## Run it
 

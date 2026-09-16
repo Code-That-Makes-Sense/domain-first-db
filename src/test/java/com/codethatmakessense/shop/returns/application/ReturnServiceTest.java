@@ -48,6 +48,25 @@ class ReturnServiceTest {
     }
 
     @Test
+    void countsEarlierReturnsAgainstTheSecondRequest() {
+        returns.request(ORDER, BOOK, new Quantity(1));
+        returns.request(ORDER, BOOK, new Quantity(1));
+
+        assertThatThrownBy(() -> returns.request(ORDER, BOOK, new Quantity(1)))
+                .isInstanceOf(ReturnNotAllowed.class);
+    }
+
+    @Test
+    void aRejectedReturnFreesItsQuantityAgain() {
+        ReturnId first = returns.request(ORDER, BOOK, new Quantity(2));
+        returns.reject(first);
+
+        ReturnId second = returns.request(ORDER, BOOK, new Quantity(2));
+
+        assertThat(requests.findById(second)).isPresent();
+    }
+
+    @Test
     void walksARequestToRefund() {
         ReturnId id = returns.request(ORDER, BOOK, new Quantity(1));
 

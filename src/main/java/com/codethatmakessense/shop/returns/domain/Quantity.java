@@ -10,6 +10,14 @@ public record Quantity(int value) {
         }
     }
 
+    public Quantity plus(Quantity other) {
+        return new Quantity(value + other.value);
+    }
+
+    public Quantity minus(Quantity other) {
+        return new Quantity(value - other.value);
+    }
+
     public boolean exceeds(Quantity other) {
         return value > other.value;
     }

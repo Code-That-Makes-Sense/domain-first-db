@@ -28,8 +28,9 @@ public class ReturnService {
         ShippedItem shipped = shippedItems.shippedItem(orderId, sku)
                 .orElseThrow(() -> new ReturnNotAllowed(
                         "Nothing of " + sku.value() + " shipped for order " + orderId.value()));
+        Quantity alreadyReturned = requests.alreadyReturned(orderId, sku);
         ReturnRequest request = ReturnRequest.request(
-                ReturnId.next(), shipped, quantity, LocalDate.now(clock));
+                ReturnId.next(), shipped, alreadyReturned, quantity, LocalDate.now(clock));
         requests.save(request);
         return request.id();
     }
