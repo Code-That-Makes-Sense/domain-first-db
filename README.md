@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 2 is in progress. The latest step is "feat(returns): derive the schema from the model". V8 is written from the model. ReturnRequestRow and JpaReturnRequestRepository arrive with a contract test that both adapters pass.
+Part 2 is in progress. The latest step is "fix(returns): saving a request twice must update it". The in-memory adapter kept a list and stored every save. The contract test that counts a request once caught it, and the list became a map keyed by id.
 
 The earlier steps of this part:
 
@@ -29,6 +29,7 @@ The earlier steps of this part:
 - fix(returns): count earlier returns of the same item
 - test(returns): guard the domain boundary with ArchUnit
 - feat(returns): answer ShippedItems from the legacy order tables
+- feat(returns): derive the schema from the model
 
 ## Run it
 

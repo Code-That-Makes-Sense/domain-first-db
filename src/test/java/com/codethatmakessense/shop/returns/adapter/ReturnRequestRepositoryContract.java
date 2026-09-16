@@ -61,6 +61,17 @@ public abstract class ReturnRequestRepositoryContract {
     }
 
     @Test
+    void countsARequestOnceHoweverOftenItIsSaved() {
+        OrderId order = anOrder();
+        ReturnRequest request = requested(order, 2);
+        repository().save(request);
+        request.approve();
+        repository().save(request);
+
+        assertThat(repository().alreadyReturned(order, BOOK)).isEqualTo(new Quantity(2));
+    }
+
+    @Test
     void findsNothingForAnUnknownId() {
         assertThat(repository().findById(ReturnId.next())).isEmpty();
     }
