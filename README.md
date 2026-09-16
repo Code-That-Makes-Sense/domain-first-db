@@ -19,13 +19,14 @@ the steps that post walks through.
 
 ## Status
 
-Part 2 is in progress. The latest step is "fix(returns): count earlier returns of the same item". A second return of the same item was allowed past what shipped. The use-case test caught it. The fix adds what already came back to the factory, the port and the in-memory adapter.
+Part 2 is in progress. The latest step is "test(returns): guard the domain boundary with ArchUnit". An ArchUnit rule checks that nothing in returns.domain and returns.application imports a framework.
 
 The earlier steps of this part:
 
 - feat(returns): model a return request from its behavior
 - feat(returns): let the domain own its ports
 - feat(returns): run the use cases over in-memory adapters
+- fix(returns): count earlier returns of the same item
 
 ## Run it
 
@@ -64,3 +65,6 @@ com.codethatmakessense.shop
 
 http/                 the request files for the HTTP Client
 ```
+
+The domain and application packages import no framework. An ArchUnit test fails
+the build if that changes.
