@@ -28,18 +28,24 @@ public class ReturnRequest {
 
     public static ReturnRequest request(ReturnId id, ShippedItem shipped, Quantity alreadyReturned,
             Quantity quantity, LocalDate requestedOn) {
+        ensureReturnable(shipped, alreadyReturned, quantity, requestedOn);
+        Money refund = shipped.unitPrice().times(quantity);
+        return new ReturnRequest(id, shipped.orderId(), shipped.sku(), quantity, requestedOn, refund, ReturnStatus.REQUESTED);
+    }
+
+    private static void ensureReturnable(ShippedItem shipped, Quantity alreadyReturned, Quantity quantity,
+            LocalDate requestedOn) {
         if (quantity.isNone()) {
             throw new ReturnNotAllowed("Nothing to return");
         }
-        if (requestedOn.isAfter(shipped.shippedOn().plus(RETURN_WINDOW))) {
-            throw new ReturnNotAllowed("The return window closed on " + shipped.shippedOn().plus(RETURN_WINDOW));
+        LocalDate windowCloses = shipped.shippedOn().plus(RETURN_WINDOW);
+        if (requestedOn.isAfter(windowCloses)) {
+            throw new ReturnNotAllowed("The return window closed on " + windowCloses);
         }
         Quantity returnable = shipped.quantity().minus(alreadyReturned);
         if (quantity.exceeds(returnable)) {
             throw new ReturnNotAllowed("Only " + returnable.value() + " of " + shipped.sku().value() + " can still be returned");
         }
-        Money refund = shipped.unitPrice().times(quantity);
-        return new ReturnRequest(id, shipped.orderId(), shipped.sku(), quantity, requestedOn, refund, ReturnStatus.REQUESTED);
     }
 
     public static ReturnRequest reconstitute(ReturnId id, OrderId orderId, Sku sku, Quantity quantity,
