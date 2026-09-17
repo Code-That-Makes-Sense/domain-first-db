@@ -42,6 +42,11 @@ public class ReturnRequest {
         return new ReturnRequest(id, shipped.orderId(), shipped.sku(), quantity, requestedOn, refund, ReturnStatus.REQUESTED);
     }
 
+    public static ReturnRequest reconstitute(ReturnId id, OrderId orderId, Sku sku, Quantity quantity,
+            LocalDate requestedOn, Money refund, ReturnStatus status) {
+        return new ReturnRequest(id, orderId, sku, quantity, requestedOn, refund, status);
+    }
+
     public void approve() {
         transition(ReturnStatus.REQUESTED, ReturnStatus.APPROVED);
     }
