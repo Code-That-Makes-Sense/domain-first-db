@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 2 is in progress. The latest step is "feat(returns): wire the module into the application". ReturnsConfiguration wires the JPA adapter as the bean. The in-memory adapter moves to the test sources, and one flow test runs through Spring.
+Part 2 is in progress. The latest step is "feat(returns): keep the returns-rate report a query". The returns rate per SKU is a query, not a domain object.
 
 The earlier steps of this part:
 
@@ -32,6 +32,7 @@ The earlier steps of this part:
 - feat(returns): derive the schema from the model
 - fix(returns): saving a request twice must update it
 - refactor(returns): fold the three refusals into one guard
+- feat(returns): wire the module into the application
 
 ## Run it
 
