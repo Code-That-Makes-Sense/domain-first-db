@@ -1,0 +1,28 @@
+### Run shop.http first so an order exists and has shipped, then request a return for one book
+POST {{host}}/returns
+Content-Type: application/json
+
+{ "orderId": {{orderId}}, "sku": "BOOK-1", "quantity": 1 }
+
+> {% client.global.set("returnId", response.body.id); %}
+
+### Approve it
+POST {{host}}/returns/{{returnId}}/approval
+
+### The parcel arrived
+POST {{host}}/returns/{{returnId}}/receipt
+
+### Refund
+POST {{host}}/returns/{{returnId}}/refund
+
+### A second return of the same book, now refused (409): only one shipped
+POST {{host}}/returns
+Content-Type: application/json
+
+{ "orderId": {{orderId}}, "sku": "BOOK-1", "quantity": 2 }
+
+### Look at the return
+GET {{host}}/returns/{{returnId}}
+
+### Returns rate per SKU
+GET {{host}}/reports/returns-rate

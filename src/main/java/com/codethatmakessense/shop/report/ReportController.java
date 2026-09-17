@@ -10,13 +10,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReportController {
 
     private final SalesReport sales;
+    private final ReturnsRateReport returnsRate;
 
-    public ReportController(SalesReport sales) {
+    public ReportController(SalesReport sales, ReturnsRateReport returnsRate) {
         this.sales = sales;
+        this.returnsRate = returnsRate;
     }
 
     @GetMapping("/sales")
     public List<DailySales> sales() {
         return sales.dailySales();
+    }
+
+    @GetMapping("/returns-rate")
+    public List<ReturnsRate> returnsRate() {
+        return returnsRate.bySku();
     }
 }

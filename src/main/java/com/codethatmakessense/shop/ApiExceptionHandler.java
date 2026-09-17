@@ -1,5 +1,6 @@
 package com.codethatmakessense.shop;
 
+import com.codethatmakessense.shop.returns.domain.ReturnNotAllowed;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,12 @@ public class ApiExceptionHandler {
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> conflict(IllegalStateException e) {
+        return Map.of("error", e.getMessage());
+    }
+
+    @ExceptionHandler(ReturnNotAllowed.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, String> refused(ReturnNotAllowed e) {
         return Map.of("error", e.getMessage());
     }
 

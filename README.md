@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 2 is in progress. The latest step is "feat(returns): cache aggregate reads with a decorator on the port". A write-through caching decorator wraps the repository port. It passes the same contract test as the adapters.
+Part 2 is complete. The latest step is "feat(returns): expose the return flow over HTTP". ReturnsController, the returns-rate endpoint and http/returns.http arrive. The returns module is complete.
 
 The earlier steps of this part:
 
@@ -34,6 +34,9 @@ The earlier steps of this part:
 - refactor(returns): fold the three refusals into one guard
 - feat(returns): wire the module into the application
 - feat(returns): keep the returns-rate report a query
+- feat(returns): cache aggregate reads with a decorator on the port
+
+The tag `part-2` points here.
 
 ## Run it
 
@@ -46,7 +49,8 @@ because H2 runs in memory and Flyway creates the schema on start.
 ```
 
 With the app running, `http/shop.http` walks an order from stock receipt to
-shipment.
+shipment, and `http/returns.http` walks a return to its refund. Run `shop.http`
+first, because the return needs a shipped order.
 
 The files use the JetBrains HTTP Client format. You can open them in IntelliJ with
 the `dev` environment selected, or run them from a terminal with the
@@ -54,7 +58,7 @@ the `dev` environment selected, or run them from a terminal with the
 which you get with `brew install ijhttp`:
 
 ```sh
-ijhttp --env-file http/http-client.env.json --env dev http/shop.http
+ijhttp --env-file http/http-client.env.json --env dev http/shop.http http/returns.http
 ```
 
 ## Layout now
@@ -68,7 +72,8 @@ com.codethatmakessense.shop
 │   └── adapter
 │       ├── jpa       the row and the JPA adapter
 │       ├── legacy    reads the legacy order tables for the ShippedItems port
-│       └── cache     the caching decorator
+│       ├── cache     the caching decorator
+│       └── web       the HTTP controller
 ├── stock             reserve, release and consume stock
 └── report            read-only reports
 
