@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 2 is in progress. The latest step is "refactor(returns): fold the three refusals into one guard". ReturnRequest.request calls one private guard for the three refusals. No test changed.
+Part 2 is in progress. The latest step is "feat(returns): wire the module into the application". ReturnsConfiguration wires the JPA adapter as the bean. The in-memory adapter moves to the test sources, and one flow test runs through Spring.
 
 The earlier steps of this part:
 
@@ -34,6 +34,7 @@ The earlier steps of this part:
 - refactor(returns): drop the shipment date, the order module owns it
 - feat(returns): derive the schema from the model
 - fix(returns): saving a request twice must update it
+- refactor(returns): fold the three refusals into one guard
 
 ## Run it
 
@@ -66,7 +67,6 @@ com.codethatmakessense.shop
 │   ├── domain        the ReturnRequest aggregate and the ports
 │   ├── application   ReturnService
 │   └── adapter
-│       ├── memory    the in-memory repository the use cases run on
 │       ├── jpa       the row and the JPA adapter
 │       └── legacy    reads the legacy order tables for the ShippedItems port
 ├── stock             reserve, release and consume stock
