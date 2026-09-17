@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 2 is in progress. The latest step is "feat(returns): keep the returns-rate report a query". The returns rate per SKU is a query, not a domain object.
+Part 2 is in progress. The latest step is "feat(returns): cache aggregate reads with a decorator on the port". A write-through caching decorator wraps the repository port. It passes the same contract test as the adapters.
 
 The earlier steps of this part:
 
@@ -33,6 +33,7 @@ The earlier steps of this part:
 - fix(returns): saving a request twice must update it
 - refactor(returns): fold the three refusals into one guard
 - feat(returns): wire the module into the application
+- feat(returns): keep the returns-rate report a query
 
 ## Run it
 
@@ -66,7 +67,8 @@ com.codethatmakessense.shop
 │   ├── application   ReturnService
 │   └── adapter
 │       ├── jpa       the row and the JPA adapter
-│       └── legacy    reads the legacy order tables for the ShippedItems port
+│       ├── legacy    reads the legacy order tables for the ShippedItems port
+│       └── cache     the caching decorator
 ├── stock             reserve, release and consume stock
 └── report            read-only reports
 
@@ -81,3 +83,4 @@ the build if that changes.
 Fork the repo and pick one.
 
 - Rewrite `JpaReturnRequestRepository` with `JdbcClient`. The contract test tells you when you are done. The domain does not notice the change.
+- Write a second decorator on the repository port. Timing is a good candidate: log the slow reads. The same contract test tells you when you are done.
