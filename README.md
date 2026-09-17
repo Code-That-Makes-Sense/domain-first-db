@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 2 is in progress. The latest step is "fix(returns): saving a request twice must update it". The in-memory adapter kept a list and stored every save. The contract test that counts a request once caught it, and the list became a map keyed by id.
+Part 2 is in progress. The latest step is "refactor(returns): fold the three refusals into one guard". ReturnRequest.request calls one private guard for the three refusals. No test changed.
 
 The earlier steps of this part:
 
@@ -33,6 +33,7 @@ The earlier steps of this part:
 - feat(returns): answer ShippedItems from the legacy order tables
 - refactor(returns): drop the shipment date, the order module owns it
 - feat(returns): derive the schema from the model
+- fix(returns): saving a request twice must update it
 
 ## Run it
 
