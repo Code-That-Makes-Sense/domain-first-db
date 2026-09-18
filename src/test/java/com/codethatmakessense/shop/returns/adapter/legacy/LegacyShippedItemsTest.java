@@ -3,7 +3,7 @@ package com.codethatmakessense.shop.returns.adapter.legacy;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codethatmakessense.shop.order.LineRequest;
-import com.codethatmakessense.shop.order.Order;
+import com.codethatmakessense.shop.order.adapter.jpa.OrderRow;
 import com.codethatmakessense.shop.order.OrderService;
 import com.codethatmakessense.shop.order.ShipmentRequest;
 import com.codethatmakessense.shop.shared.Money;
@@ -36,7 +36,7 @@ class LegacyShippedItemsTest {
     void reportsWhatShippedAcrossShipmentsAndNothingForTheRest() {
         stock.receive("BOOK-1", 10);
         stock.receive("MUG-7", 5);
-        Order order = orderService.place("viktor@example.com", List.of(
+        OrderRow order = orderService.place("viktor@example.com", List.of(
                 new LineRequest("BOOK-1", 3, 1_500),
                 new LineRequest("MUG-7", 1, 900)));
         orderService.pay(order.getId(), "PAY-42");

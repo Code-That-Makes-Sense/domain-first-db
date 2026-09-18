@@ -1,4 +1,4 @@
-package com.codethatmakessense.shop.order;
+package com.codethatmakessense.shop.order.adapter.jpa;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -15,7 +15,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "shipments")
-public class Shipment {
+public class ShipmentRow {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +23,7 @@ public class Shipment {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "order_id")
-    private Order order;
+    private OrderRow order;
 
     private LocalDate shippedOn;
 
@@ -32,7 +32,7 @@ public class Shipment {
     private String trackingNumber;
 
     @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ShipmentLine> lines = new ArrayList<>();
+    private List<ShipmentLineRow> lines = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -42,11 +42,11 @@ public class Shipment {
         this.id = id;
     }
 
-    public Order getOrder() {
+    public OrderRow getOrder() {
         return order;
     }
 
-    public void setOrder(Order order) {
+    public void setOrder(OrderRow order) {
         this.order = order;
     }
 
@@ -74,11 +74,11 @@ public class Shipment {
         this.trackingNumber = trackingNumber;
     }
 
-    public List<ShipmentLine> getLines() {
+    public List<ShipmentLineRow> getLines() {
         return lines;
     }
 
-    public void setLines(List<ShipmentLine> lines) {
+    public void setLines(List<ShipmentLineRow> lines) {
         this.lines = lines;
     }
 }

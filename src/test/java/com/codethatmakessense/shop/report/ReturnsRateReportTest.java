@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
 import com.codethatmakessense.shop.order.LineRequest;
-import com.codethatmakessense.shop.order.Order;
+import com.codethatmakessense.shop.order.adapter.jpa.OrderRow;
 import com.codethatmakessense.shop.order.OrderService;
 import com.codethatmakessense.shop.returns.application.ReturnService;
 import com.codethatmakessense.shop.shared.OrderId;
@@ -40,7 +40,7 @@ class ReturnsRateReportTest {
     @Test
     void relatesWhatCameBackToWhatShipped() {
         stock.receive("BOOK-1", 10);
-        Order order = orderService.place("viktor@example.com", List.of(new LineRequest("BOOK-1", 4, 1_500)));
+        OrderRow order = orderService.place("viktor@example.com", List.of(new LineRequest("BOOK-1", 4, 1_500)));
         orderService.pay(order.getId(), "PAY-42");
         orderService.ship(order.getId(), "DHL", "TRACK-1");
         returns.request(new OrderId(order.getId()), new Sku("BOOK-1"), new Quantity(1));
