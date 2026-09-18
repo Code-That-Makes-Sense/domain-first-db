@@ -1,9 +1,9 @@
 package com.codethatmakessense.shop.returns.application;
 
-import com.codethatmakessense.shop.returns.domain.OrderId;
 import com.codethatmakessense.shop.returns.domain.ShippedItem;
 import com.codethatmakessense.shop.returns.domain.ShippedItems;
-import com.codethatmakessense.shop.returns.domain.Sku;
+import com.codethatmakessense.shop.shared.OrderId;
+import com.codethatmakessense.shop.shared.Sku;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
