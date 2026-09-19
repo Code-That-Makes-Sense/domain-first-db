@@ -3,6 +3,9 @@ package com.codethatmakessense.shop.order;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.codethatmakessense.shop.order.adapter.jpa.OrderRow;
+import com.codethatmakessense.shop.order.adapter.jpa.OrderRowRepository;
+
 import com.codethatmakessense.shop.stock.StockService;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +22,7 @@ class OrderServiceTest {
     OrderService orderService;
 
     @Autowired
-    OrderRepository orders;
+    OrderRowRepository orders;
 
     @Autowired
     StockService stock;
@@ -32,11 +35,11 @@ class OrderServiceTest {
 
     @Test
     void placesAnOrderWithItsLinesAndTotal() {
-        Order placed = orderService.place("viktor@example.com", List.of(
+        OrderRow placed = orderService.place("viktor@example.com", List.of(
                 new LineRequest("BOOK-1", 2, 1_500),
                 new LineRequest("MUG-7", 1, 900)));
 
-        Order stored = orders.findById(placed.getId()).orElseThrow();
+        OrderRow stored = orders.findById(placed.getId()).orElseThrow();
         assertThat(stored.getStatus()).isEqualTo(OrderStatus.PLACED);
         assertThat(stored.getLines()).hasSize(2);
         assertThat(stored.getTotalCents()).isEqualTo(3_900);
@@ -44,11 +47,11 @@ class OrderServiceTest {
 
     @Test
     void paysAPlacedOrder() {
-        Order placed = place();
+        OrderRow placed = place();
 
         orderService.pay(placed.getId(), "PAY-42");
 
-        Order stored = orders.findById(placed.getId()).orElseThrow();
+        OrderRow stored = orders.findById(placed.getId()).orElseThrow();
         assertThat(stored.getStatus()).isEqualTo(OrderStatus.PAID);
         assertThat(stored.getPaidOn()).isNotNull();
         assertThat(stored.getPaymentReference()).isEqualTo("PAY-42");
@@ -56,7 +59,7 @@ class OrderServiceTest {
 
     @Test
     void refusesToPayTwice() {
-        Order placed = place();
+        OrderRow placed = place();
         orderService.pay(placed.getId(), "PAY-42");
 
         assertThatThrownBy(() -> orderService.pay(placed.getId(), "PAY-43"))
@@ -65,12 +68,12 @@ class OrderServiceTest {
 
     @Test
     void shipsAPaidOrder() {
-        Order placed = place();
+        OrderRow placed = place();
         orderService.pay(placed.getId(), "PAY-42");
 
         orderService.ship(placed.getId(), "DHL", "TRACK-1");
 
-        Order stored = orders.findById(placed.getId()).orElseThrow();
+        OrderRow stored = orders.findById(placed.getId()).orElseThrow();
         assertThat(stored.getStatus()).isEqualTo(OrderStatus.SHIPPED);
         assertThat(stored.getShippedOn()).isNotNull();
         assertThat(stored.getTrackingNumber()).isEqualTo("TRACK-1");
@@ -78,7 +81,7 @@ class OrderServiceTest {
 
     @Test
     void refusesToShipAnUnpaidOrder() {
-        Order placed = place();
+        OrderRow placed = place();
 
         assertThatThrownBy(() -> orderService.ship(placed.getId(), "DHL", "TRACK-1"))
                 .isInstanceOf(IllegalStateException.class);
@@ -86,12 +89,12 @@ class OrderServiceTest {
 
     @Test
     void cancelsAnUnshippedOrder() {
-        Order placed = place();
+        OrderRow placed = place();
         orderService.pay(placed.getId(), "PAY-42");
 
         orderService.cancel(placed.getId(), "changed my mind");
 
-        Order stored = orders.findById(placed.getId()).orElseThrow();
+        OrderRow stored = orders.findById(placed.getId()).orElseThrow();
         assertThat(stored.getStatus()).isEqualTo(OrderStatus.CANCELLED);
         assertThat(stored.getCancelledOn()).isNotNull();
         assertThat(stored.getCancellationReason()).isEqualTo("changed my mind");
@@ -99,7 +102,7 @@ class OrderServiceTest {
 
     @Test
     void refusesToCancelAShippedOrder() {
-        Order placed = place();
+        OrderRow placed = place();
         orderService.pay(placed.getId(), "PAY-42");
         orderService.ship(placed.getId(), "DHL", "TRACK-1");
 
@@ -109,7 +112,7 @@ class OrderServiceTest {
 
     @Test
     void reservesStockWhenPlacingAndReleasesItWhenCancelling() {
-        Order placed = place();
+        OrderRow placed = place();
         assertThat(stock.available("BOOK-1")).isEqualTo(8);
 
         orderService.cancel(placed.getId(), "changed my mind");
@@ -119,7 +122,7 @@ class OrderServiceTest {
 
     @Test
     void consumesStockWhenShipping() {
-        Order placed = place();
+        OrderRow placed = place();
         orderService.pay(placed.getId(), "PAY-42");
 
         orderService.ship(placed.getId(), "DHL", "TRACK-1");
@@ -136,23 +139,23 @@ class OrderServiceTest {
 
     @Test
     void remembersGiftWrapping() {
-        Order placed = orderService.place("viktor@example.com",
+        OrderRow placed = orderService.place("viktor@example.com",
                 List.of(new LineRequest("BOOK-1", 1, 1_500)), true, "Happy reading");
 
-        Order stored = orders.findById(placed.getId()).orElseThrow();
+        OrderRow stored = orders.findById(placed.getId()).orElseThrow();
         assertThat(stored.isGiftWrap()).isTrue();
         assertThat(stored.getGiftMessage()).isEqualTo("Happy reading");
     }
 
     @Test
     void shipsPartOfAnOrderAndKeepsTheRestOpen() {
-        Order placed = place();
+        OrderRow placed = place();
         orderService.pay(placed.getId(), "PAY-42");
 
         orderService.ship(placed.getId(), "DHL", "TRACK-1",
                 List.of(new ShipmentRequest("BOOK-1", 2)));
 
-        Order stored = orders.findById(placed.getId()).orElseThrow();
+        OrderRow stored = orders.findById(placed.getId()).orElseThrow();
         assertThat(stored.getStatus()).isEqualTo(OrderStatus.PARTIALLY_SHIPPED);
         assertThat(stored.getShipments()).hasSize(1);
         assertThat(orderService.isShippable(stored)).isTrue();
@@ -167,7 +170,7 @@ class OrderServiceTest {
 
     @Test
     void refusesToShipMoreThanOrdered() {
-        Order placed = place();
+        OrderRow placed = place();
         orderService.pay(placed.getId(), "PAY-42");
 
         assertThatThrownBy(() -> orderService.ship(placed.getId(), "DHL", "TRACK-1",
@@ -188,7 +191,7 @@ class OrderServiceTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    private Order place() {
+    private OrderRow place() {
         return orderService.place("viktor@example.com", List.of(
                 new LineRequest("BOOK-1", 2, 1_500),
                 new LineRequest("MUG-7", 1, 900)));

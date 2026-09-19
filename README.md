@@ -19,7 +19,11 @@ the steps that post walks through.
 
 ## Status
 
-Part 3 is in progress. The latest step is "refactor: lift Sku, Quantity, Money and OrderId into a shared kernel". Sku, Quantity, Money and OrderId move to shop.shared, the kernel both modules use.
+Part 3 is in progress. The latest step is "refactor(order): rename the JPA entities to rows". Order, OrderLine, Shipment and ShipmentLine become OrderRow, OrderLineRow, ShipmentRow and ShipmentLineRow in order.adapter.jpa. The legacy service still uses them.
+
+The earlier steps of this part:
+
+- refactor: lift Sku, Quantity, Money and OrderId into a shared kernel
 
 ## Run it
 
@@ -50,6 +54,8 @@ ijhttp --env-file http/http-client.env.json --env dev http/shop.http http/return
 com.codethatmakessense.shop
 ├── shared            Sku, Quantity, Money and OrderId
 ├── order             the legacy service and the JPA entities that mirror the tables
+│   └── adapter
+│       └── jpa       the rows and the JPA adapter
 ├── returns           the Spring configuration of the module
 │   ├── domain        the ReturnRequest aggregate and the ports
 │   ├── application   ReturnService

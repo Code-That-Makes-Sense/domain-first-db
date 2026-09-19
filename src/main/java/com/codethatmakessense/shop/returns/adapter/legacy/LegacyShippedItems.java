@@ -1,10 +1,10 @@
 package com.codethatmakessense.shop.returns.adapter.legacy;
 
-import com.codethatmakessense.shop.order.Order;
-import com.codethatmakessense.shop.order.OrderLine;
-import com.codethatmakessense.shop.order.OrderRepository;
-import com.codethatmakessense.shop.order.Shipment;
-import com.codethatmakessense.shop.order.ShipmentLine;
+import com.codethatmakessense.shop.order.adapter.jpa.OrderLineRow;
+import com.codethatmakessense.shop.order.adapter.jpa.OrderRow;
+import com.codethatmakessense.shop.order.adapter.jpa.OrderRowRepository;
+import com.codethatmakessense.shop.order.adapter.jpa.ShipmentLineRow;
+import com.codethatmakessense.shop.order.adapter.jpa.ShipmentRow;
 import com.codethatmakessense.shop.returns.domain.ShippedItem;
 import com.codethatmakessense.shop.returns.domain.ShippedItems;
 import com.codethatmakessense.shop.shared.Money;
@@ -19,24 +19,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class LegacyShippedItems implements ShippedItems {
 
-    private final OrderRepository orders;
+    private final OrderRowRepository orders;
 
-    public LegacyShippedItems(OrderRepository orders) {
+    public LegacyShippedItems(OrderRowRepository orders) {
         this.orders = orders;
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<ShippedItem> shippedItem(OrderId orderId, Sku sku) {
-        Optional<Order> found = orders.findById(orderId.value());
+        Optional<OrderRow> found = orders.findById(orderId.value());
         if (found.isEmpty()) {
             return Optional.empty();
         }
-        Order order = found.get();
+        OrderRow order = found.get();
         Quantity shipped = Quantity.NONE;
         LocalDate firstShippedOn = null;
-        for (Shipment shipment : order.getShipments()) {
-            for (ShipmentLine line : shipment.getLines()) {
+        for (ShipmentRow shipment : order.getShipments()) {
+            for (ShipmentLineRow line : shipment.getLines()) {
                 if (line.getSku().equals(sku.value())) {
                     shipped = shipped.plus(new Quantity(line.getQuantity()));
                     if (firstShippedOn == null || shipment.getShippedOn().isBefore(firstShippedOn)) {
@@ -51,8 +51,8 @@ public class LegacyShippedItems implements ShippedItems {
         return Optional.of(new ShippedItem(orderId, sku, shipped, unitPrice(order, sku), firstShippedOn));
     }
 
-    private Money unitPrice(Order order, Sku sku) {
-        for (OrderLine line : order.getLines()) {
+    private Money unitPrice(OrderRow order, Sku sku) {
+        for (OrderLineRow line : order.getLines()) {
             if (line.getSku().equals(sku.value())) {
                 return new Money(line.getUnitPriceCents());
             }

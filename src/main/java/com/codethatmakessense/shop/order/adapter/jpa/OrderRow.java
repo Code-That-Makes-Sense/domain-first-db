@@ -1,5 +1,6 @@
-package com.codethatmakessense.shop.order;
+package com.codethatmakessense.shop.order.adapter.jpa;
 
+import com.codethatmakessense.shop.order.OrderStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,7 +17,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "orders")
-public class Order {
+public class OrderRow {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orders_id_seq")
@@ -51,10 +52,10 @@ public class Order {
     private String giftMessage;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderLine> lines = new ArrayList<>();
+    private List<OrderLineRow> lines = new ArrayList<>();
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Shipment> shipments = new ArrayList<>();
+    private List<ShipmentRow> shipments = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -168,19 +169,19 @@ public class Order {
         this.giftMessage = giftMessage;
     }
 
-    public List<OrderLine> getLines() {
+    public List<OrderLineRow> getLines() {
         return lines;
     }
 
-    public void setLines(List<OrderLine> lines) {
+    public void setLines(List<OrderLineRow> lines) {
         this.lines = lines;
     }
 
-    public List<Shipment> getShipments() {
+    public List<ShipmentRow> getShipments() {
         return shipments;
     }
 
-    public void setShipments(List<Shipment> shipments) {
+    public void setShipments(List<ShipmentRow> shipments) {
         this.shipments = shipments;
     }
 }

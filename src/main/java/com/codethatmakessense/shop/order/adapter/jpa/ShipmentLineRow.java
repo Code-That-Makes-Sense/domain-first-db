@@ -1,4 +1,4 @@
-package com.codethatmakessense.shop.order;
+package com.codethatmakessense.shop.order.adapter.jpa;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,7 +10,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "shipment_lines")
-public class ShipmentLine {
+public class ShipmentLineRow {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +18,7 @@ public class ShipmentLine {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "shipment_id")
-    private Shipment shipment;
+    private ShipmentRow shipment;
 
     private String sku;
 
@@ -32,11 +32,11 @@ public class ShipmentLine {
         this.id = id;
     }
 
-    public Shipment getShipment() {
+    public ShipmentRow getShipment() {
         return shipment;
     }
 
-    public void setShipment(Shipment shipment) {
+    public void setShipment(ShipmentRow shipment) {
         this.shipment = shipment;
     }
 

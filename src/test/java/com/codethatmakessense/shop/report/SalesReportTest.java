@@ -3,7 +3,7 @@ package com.codethatmakessense.shop.report;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codethatmakessense.shop.order.LineRequest;
-import com.codethatmakessense.shop.order.Order;
+import com.codethatmakessense.shop.order.adapter.jpa.OrderRow;
 import com.codethatmakessense.shop.order.OrderService;
 import com.codethatmakessense.shop.stock.StockService;
 import jakarta.persistence.EntityManager;
@@ -34,7 +34,7 @@ class SalesReportTest {
         stock.receive("BOOK-1", 10);
         orderService.place("a@example.com", List.of(new LineRequest("BOOK-1", 1, 1_500)));
         orderService.place("b@example.com", List.of(new LineRequest("BOOK-1", 2, 1_500)));
-        Order cancelled = orderService.place("c@example.com", List.of(new LineRequest("BOOK-1", 1, 1_500)));
+        OrderRow cancelled = orderService.place("c@example.com", List.of(new LineRequest("BOOK-1", 1, 1_500)));
         orderService.cancel(cancelled.getId(), "changed my mind");
         entityManager.flush();
 
