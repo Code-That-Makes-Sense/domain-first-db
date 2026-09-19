@@ -19,12 +19,13 @@ the steps that post walks through.
 
 ## Status
 
-Part 3 is in progress. The latest step is "feat(order): model the order aggregate from its behavior". The Order aggregate arrives in order.domain with unit tests. The cancel guard is the legacy one on purpose, and a test pins it.
+Part 3 is in progress. The latest step is "feat(order): let the domain own its ports". The domain owns two ports, OrderRepository and StockReservations. An in-memory adapter and a contract test come with them.
 
 The earlier steps of this part:
 
 - refactor: lift Sku, Quantity, Money and OrderId into a shared kernel
 - refactor(order): rename the JPA entities to rows
+- feat(order): model the order aggregate from its behavior
 
 ## Run it
 
