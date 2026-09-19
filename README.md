@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 3 is in progress. The latest step is "refactor(order): move the status enum into the domain". OrderStatus moves into the domain.
+Part 3 is in progress. The latest step is "refactor(order): draw order ids from the sequence explicitly". Both the legacy path and the new path draw order ids from the sequence explicitly. An aggregate can now have its id before it is saved.
 
 The earlier steps of this part:
 
@@ -27,6 +27,7 @@ The earlier steps of this part:
 - refactor(order): rename the JPA entities to rows
 - feat(order): model the order aggregate from its behavior
 - feat(order): let the domain own its ports
+- refactor(order): move the status enum into the domain
 
 ## Run it
 

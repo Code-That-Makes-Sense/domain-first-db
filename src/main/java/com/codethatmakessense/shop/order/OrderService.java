@@ -36,6 +36,7 @@ public class OrderService {
             throw new IllegalArgumentException("An order needs at least one line");
         }
         OrderRow order = new OrderRow();
+        order.setId(orders.nextId());
         order.setCustomerEmail(customerEmail);
         order.setStatus(OrderStatus.PLACED);
         order.setPlacedOn(LocalDate.now());
