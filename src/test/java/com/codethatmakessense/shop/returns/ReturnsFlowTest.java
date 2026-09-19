@@ -3,7 +3,6 @@ package com.codethatmakessense.shop.returns;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codethatmakessense.shop.order.LineRequest;
-import com.codethatmakessense.shop.order.adapter.jpa.OrderRow;
 import com.codethatmakessense.shop.order.OrderService;
 import com.codethatmakessense.shop.returns.application.ReturnService;
 import com.codethatmakessense.shop.shared.Money;
@@ -40,11 +39,11 @@ class ReturnsFlowTest {
     @Test
     void refundsAShippedItem() {
         stock.receive("BOOK-1", 10);
-        OrderRow order = orderService.place("viktor@example.com", List.of(new LineRequest("BOOK-1", 2, 1_500)));
-        orderService.pay(order.getId(), "PAY-42");
-        orderService.ship(order.getId(), "DHL", "TRACK-1");
+        Long orderId = orderService.place("viktor@example.com", List.of(new LineRequest("BOOK-1", 2, 1_500)));
+        orderService.pay(orderId, "PAY-42");
+        orderService.ship(orderId, "DHL", "TRACK-1");
 
-        ReturnId id = returns.request(new OrderId(order.getId()), new Sku("BOOK-1"), new Quantity(1));
+        ReturnId id = returns.request(new OrderId(orderId), new Sku("BOOK-1"), new Quantity(1));
         returns.approve(id);
         returns.receive(id);
         returns.refund(id);

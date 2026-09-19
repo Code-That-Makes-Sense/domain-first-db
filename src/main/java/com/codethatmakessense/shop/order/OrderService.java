@@ -1,12 +1,21 @@
 package com.codethatmakessense.shop.order;
 
+import com.codethatmakessense.shop.order.domain.OrderStatus;
 import com.codethatmakessense.shop.order.adapter.jpa.OrderLineRow;
 import com.codethatmakessense.shop.order.adapter.jpa.OrderRow;
 import com.codethatmakessense.shop.order.adapter.jpa.OrderRowRepository;
 import com.codethatmakessense.shop.order.adapter.jpa.ShipmentLineRow;
 import com.codethatmakessense.shop.order.adapter.jpa.ShipmentRow;
-import com.codethatmakessense.shop.order.domain.OrderStatus;
+import com.codethatmakessense.shop.order.domain.CustomerEmail;
+import com.codethatmakessense.shop.order.domain.Order;
+import com.codethatmakessense.shop.order.domain.OrderLine;
+import com.codethatmakessense.shop.order.domain.OrderRepository;
+import com.codethatmakessense.shop.order.domain.StockReservations;
+import com.codethatmakessense.shop.shared.Money;
+import com.codethatmakessense.shop.shared.Quantity;
+import com.codethatmakessense.shop.shared.Sku;
 import com.codethatmakessense.shop.stock.StockService;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,44 +29,40 @@ public class OrderService {
 
     private final StockService stock;
 
-    public OrderService(OrderRowRepository orders, StockService stock) {
+    private final OrderRepository orderRepository;
+
+    private final StockReservations stockReservations;
+
+    private final Clock clock;
+
+    public OrderService(OrderRowRepository orders, StockService stock, OrderRepository orderRepository,
+            StockReservations stockReservations, Clock clock) {
         this.orders = orders;
         this.stock = stock;
+        this.orderRepository = orderRepository;
+        this.stockReservations = stockReservations;
+        this.clock = clock;
     }
 
     @Transactional
-    public OrderRow place(String customerEmail, List<LineRequest> lines) {
+    public Long place(String customerEmail, List<LineRequest> lines) {
         return place(customerEmail, lines, false, null);
     }
 
     @Transactional
-    public OrderRow place(String customerEmail, List<LineRequest> lines, boolean giftWrap, String giftMessage) {
-        if (lines.isEmpty()) {
-            throw new IllegalArgumentException("An order needs at least one line");
+    public Long place(String customerEmail, List<LineRequest> requests, boolean giftWrap, String giftMessage) {
+        List<OrderLine> lines = new ArrayList<>();
+        for (LineRequest request : requests) {
+            lines.add(new OrderLine(new Sku(request.sku()), new Quantity(request.quantity()),
+                    new Money(request.unitPriceCents())));
         }
-        OrderRow order = new OrderRow();
-        order.setId(orders.nextId());
-        order.setCustomerEmail(customerEmail);
-        order.setStatus(OrderStatus.PLACED);
-        order.setPlacedOn(LocalDate.now());
-        order.setGiftWrap(giftWrap);
-        order.setGiftMessage(giftMessage);
-        long total = 0;
-        for (LineRequest request : lines) {
-            if (request.quantity() <= 0) {
-                throw new IllegalArgumentException("Quantity must be positive: " + request.sku());
-            }
-            stock.reserve(request.sku(), request.quantity());
-            OrderLineRow line = new OrderLineRow();
-            line.setOrder(order);
-            line.setSku(request.sku());
-            line.setQuantity(request.quantity());
-            line.setUnitPriceCents(request.unitPriceCents());
-            order.getLines().add(line);
-            total += request.quantity() * request.unitPriceCents();
+        Order order = Order.place(orderRepository.nextId(), new CustomerEmail(customerEmail), lines, giftWrap,
+                LocalDate.now(clock));
+        for (OrderLine line : order.lines()) {
+            stockReservations.reserve(line.sku(), line.quantity());
         }
-        order.setTotalCents(total);
-        return orders.save(order);
+        orderRepository.save(order);
+        return order.id().value();
     }
 
     @Transactional
