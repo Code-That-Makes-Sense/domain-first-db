@@ -1,4 +1,4 @@
-package com.codethatmakessense.shop.returns.domain;
+package com.codethatmakessense.shop.shared;
 
 public record Sku(String value) {
 

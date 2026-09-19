@@ -2,15 +2,15 @@ package com.codethatmakessense.shop.returns.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.codethatmakessense.shop.returns.domain.Money;
-import com.codethatmakessense.shop.returns.domain.OrderId;
-import com.codethatmakessense.shop.returns.domain.Quantity;
+import com.codethatmakessense.shop.shared.Money;
+import com.codethatmakessense.shop.shared.OrderId;
+import com.codethatmakessense.shop.shared.Quantity;
 import com.codethatmakessense.shop.returns.domain.ReturnId;
 import com.codethatmakessense.shop.returns.domain.ReturnRequest;
 import com.codethatmakessense.shop.returns.domain.ReturnRequestRepository;
 import com.codethatmakessense.shop.returns.domain.ReturnStatus;
 import com.codethatmakessense.shop.returns.domain.ShippedItem;
-import com.codethatmakessense.shop.returns.domain.Sku;
+import com.codethatmakessense.shop.shared.Sku;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 

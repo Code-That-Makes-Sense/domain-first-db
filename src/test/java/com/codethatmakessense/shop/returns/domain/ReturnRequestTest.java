@@ -3,6 +3,11 @@ package com.codethatmakessense.shop.returns.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.codethatmakessense.shop.shared.Money;
+import com.codethatmakessense.shop.shared.OrderId;
+import com.codethatmakessense.shop.shared.Quantity;
+import com.codethatmakessense.shop.shared.Sku;
+
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 

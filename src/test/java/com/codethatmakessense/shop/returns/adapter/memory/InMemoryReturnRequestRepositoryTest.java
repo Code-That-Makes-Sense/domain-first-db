@@ -1,8 +1,8 @@
 package com.codethatmakessense.shop.returns.adapter.memory;
 
 import com.codethatmakessense.shop.returns.adapter.ReturnRequestRepositoryContract;
-import com.codethatmakessense.shop.returns.domain.OrderId;
 import com.codethatmakessense.shop.returns.domain.ReturnRequestRepository;
+import com.codethatmakessense.shop.shared.OrderId;
 
 class InMemoryReturnRequestRepositoryTest extends ReturnRequestRepositoryContract {
 

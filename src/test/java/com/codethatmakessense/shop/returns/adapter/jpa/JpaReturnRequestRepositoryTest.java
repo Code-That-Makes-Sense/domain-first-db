@@ -1,8 +1,8 @@
 package com.codethatmakessense.shop.returns.adapter.jpa;
 
 import com.codethatmakessense.shop.returns.adapter.ReturnRequestRepositoryContract;
-import com.codethatmakessense.shop.returns.domain.OrderId;
 import com.codethatmakessense.shop.returns.domain.ReturnRequestRepository;
+import com.codethatmakessense.shop.shared.OrderId;
 import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
