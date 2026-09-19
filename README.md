@@ -19,11 +19,12 @@ the steps that post walks through.
 
 ## Status
 
-Part 3 is in progress. The latest step is "refactor(order): rename the JPA entities to rows". Order, OrderLine, Shipment and ShipmentLine become OrderRow, OrderLineRow, ShipmentRow and ShipmentLineRow in order.adapter.jpa. The legacy service still uses them.
+Part 3 is in progress. The latest step is "feat(order): model the order aggregate from its behavior". The Order aggregate arrives in order.domain with unit tests. The cancel guard is the legacy one on purpose, and a test pins it.
 
 The earlier steps of this part:
 
 - refactor: lift Sku, Quantity, Money and OrderId into a shared kernel
+- refactor(order): rename the JPA entities to rows
 
 ## Run it
 
@@ -53,7 +54,8 @@ ijhttp --env-file http/http-client.env.json --env dev http/shop.http http/return
 ```text
 com.codethatmakessense.shop
 ├── shared            Sku, Quantity, Money and OrderId
-├── order             the legacy service and the JPA entities that mirror the tables
+├── order             the legacy service, routed to the aggregate method by method
+│   ├── domain        the Order aggregate, the value objects, and the ports
 │   └── adapter
 │       └── jpa       the rows and the JPA adapter
 ├── returns           the Spring configuration of the module
