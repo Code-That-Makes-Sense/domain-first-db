@@ -1,6 +1,6 @@
 package com.codethatmakessense.shop.order.adapter.jpa;
 
-import com.codethatmakessense.shop.order.OrderStatus;
+import com.codethatmakessense.shop.order.domain.OrderStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
