@@ -5,6 +5,7 @@ import com.codethatmakessense.shop.order.adapter.jpa.OrderRow;
 import com.codethatmakessense.shop.order.adapter.jpa.OrderRowRepository;
 import com.codethatmakessense.shop.order.adapter.jpa.ShipmentLineRow;
 import com.codethatmakessense.shop.order.adapter.jpa.ShipmentRow;
+import com.codethatmakessense.shop.order.domain.OrderStatus;
 import com.codethatmakessense.shop.stock.StockService;
 import java.time.LocalDate;
 import java.util.ArrayList;

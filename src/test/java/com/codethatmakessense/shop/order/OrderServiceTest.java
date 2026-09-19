@@ -3,6 +3,8 @@ package com.codethatmakessense.shop.order;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.codethatmakessense.shop.order.domain.OrderStatus;
+
 import com.codethatmakessense.shop.order.adapter.jpa.OrderRow;
 import com.codethatmakessense.shop.order.adapter.jpa.OrderRowRepository;
 
