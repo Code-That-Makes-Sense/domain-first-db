@@ -9,6 +9,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import com.codethatmakessense.shop.order.domain.Shipment;
+import com.codethatmakessense.shop.order.domain.ShipmentLine;
+import com.codethatmakessense.shop.shared.Quantity;
+import com.codethatmakessense.shop.shared.Sku;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +37,30 @@ public class ShipmentRow {
 
     @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ShipmentLineRow> lines = new ArrayList<>();
+
+    static ShipmentRow from(OrderRow order, Shipment shipment) {
+        ShipmentRow row = new ShipmentRow();
+        row.order = order;
+        row.shippedOn = shipment.shippedOn();
+        row.carrier = shipment.carrier();
+        row.trackingNumber = shipment.trackingNumber();
+        for (ShipmentLine line : shipment.lines()) {
+            ShipmentLineRow lineRow = new ShipmentLineRow();
+            lineRow.setShipment(row);
+            lineRow.setSku(line.sku().value());
+            lineRow.setQuantity(line.quantity().value());
+            row.lines.add(lineRow);
+        }
+        return row;
+    }
+
+    Shipment toDomain() {
+        List<ShipmentLine> domainLines = new ArrayList<>();
+        for (ShipmentLineRow line : lines) {
+            domainLines.add(new ShipmentLine(new Sku(line.getSku()), new Quantity(line.getQuantity())));
+        }
+        return new Shipment(shippedOn, carrier, trackingNumber, domainLines);
+    }
 
     public Long getId() {
         return id;

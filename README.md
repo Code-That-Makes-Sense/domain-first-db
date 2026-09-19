@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 3 is in progress. The latest step is "refactor(order): draw order ids from the sequence explicitly". Both the legacy path and the new path draw order ids from the sequence explicitly. An aggregate can now have its id before it is saved.
+Part 3 is in progress. The latest step is "feat(order): persist the aggregate onto the legacy tables". JpaOrderRepository maps the aggregate onto the legacy rows and passes the contract test.
 
 The earlier steps of this part:
 
@@ -28,6 +28,7 @@ The earlier steps of this part:
 - feat(order): model the order aggregate from its behavior
 - feat(order): let the domain own its ports
 - refactor(order): move the status enum into the domain
+- refactor(order): draw order ids from the sequence explicitly
 
 ## Run it
 
