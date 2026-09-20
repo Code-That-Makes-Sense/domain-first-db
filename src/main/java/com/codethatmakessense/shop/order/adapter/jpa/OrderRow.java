@@ -8,6 +8,17 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import com.codethatmakessense.shop.order.domain.Cancellation;
+import com.codethatmakessense.shop.order.domain.CustomerEmail;
+import com.codethatmakessense.shop.order.domain.Order;
+import com.codethatmakessense.shop.order.domain.OrderLine;
+import com.codethatmakessense.shop.order.domain.Payment;
+import com.codethatmakessense.shop.order.domain.Shipment;
+import com.codethatmakessense.shop.order.domain.ShipmentLine;
+import com.codethatmakessense.shop.shared.Money;
+import com.codethatmakessense.shop.shared.OrderId;
+import com.codethatmakessense.shop.shared.Quantity;
+import com.codethatmakessense.shop.shared.Sku;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +62,69 @@ public class OrderRow {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ShipmentRow> shipments = new ArrayList<>();
+
+    static OrderRow newFrom(Order order) {
+        OrderRow row = new OrderRow();
+        row.id = order.id().value();
+        row.customerEmail = order.customer().value();
+        row.placedOn = order.placedOn();
+        row.giftWrap = order.giftWrap();
+        for (OrderLine line : order.lines()) {
+            OrderLineRow lineRow = new OrderLineRow();
+            lineRow.setOrder(row);
+            lineRow.setSku(line.sku().value());
+            lineRow.setQuantity(line.quantity().value());
+            lineRow.setUnitPriceCents(line.unitPrice().cents());
+            row.lines.add(lineRow);
+        }
+        row.update(order);
+        return row;
+    }
+
+    void update(Order order) {
+        status = order.status();
+        totalCents = order.total().cents();
+        order.payment().ifPresent(payment -> {
+            paidOn = payment.paidOn();
+            paymentReference = payment.reference();
+        });
+        order.cancellation().ifPresent(cancellation -> {
+            cancelledOn = cancellation.cancelledOn();
+            cancellationReason = cancellation.reason();
+        });
+        List<Shipment> domainShipments = order.shipments();
+        for (int i = shipments.size(); i < domainShipments.size(); i++) {
+            shipments.add(ShipmentRow.from(this, domainShipments.get(i)));
+        }
+        if (shippedOn == null && !domainShipments.isEmpty()) {
+            Shipment first = domainShipments.getFirst();
+            shippedOn = first.shippedOn();
+            carrier = first.carrier();
+            trackingNumber = first.trackingNumber();
+        }
+    }
+
+    Order toDomain() {
+        List<OrderLine> domainLines = new ArrayList<>();
+        for (OrderLineRow line : lines) {
+            domainLines.add(new OrderLine(new Sku(line.getSku()), new Quantity(line.getQuantity()),
+                    new Money(line.getUnitPriceCents())));
+        }
+        Payment payment = null;
+        if (paidOn != null) {
+            payment = new Payment(paymentReference, paidOn);
+        }
+        Cancellation cancellation = null;
+        if (cancelledOn != null) {
+            cancellation = new Cancellation(cancellationReason, cancelledOn);
+        }
+        List<Shipment> domainShipments = new ArrayList<>();
+        for (ShipmentRow shipment : shipments) {
+            domainShipments.add(shipment.toDomain());
+        }
+        return Order.reconstitute(new OrderId(id), new CustomerEmail(customerEmail), domainLines, placedOn,
+                giftWrap, status, payment, domainShipments, cancellation);
+    }
 
     public Long getId() {
         return id;
