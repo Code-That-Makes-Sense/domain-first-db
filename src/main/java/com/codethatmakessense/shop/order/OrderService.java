@@ -1,11 +1,5 @@
 package com.codethatmakessense.shop.order;
 
-import com.codethatmakessense.shop.order.domain.OrderStatus;
-import com.codethatmakessense.shop.order.adapter.jpa.OrderLineRow;
-import com.codethatmakessense.shop.order.adapter.jpa.OrderRow;
-import com.codethatmakessense.shop.order.adapter.jpa.OrderRowRepository;
-import com.codethatmakessense.shop.order.adapter.jpa.ShipmentLineRow;
-import com.codethatmakessense.shop.order.adapter.jpa.ShipmentRow;
 import com.codethatmakessense.shop.order.domain.CustomerEmail;
 import com.codethatmakessense.shop.order.domain.Order;
 import com.codethatmakessense.shop.order.domain.OrderLine;
@@ -17,7 +11,6 @@ import com.codethatmakessense.shop.shared.Money;
 import com.codethatmakessense.shop.shared.OrderId;
 import com.codethatmakessense.shop.shared.Quantity;
 import com.codethatmakessense.shop.shared.Sku;
-import com.codethatmakessense.shop.stock.StockService;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -28,20 +21,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class OrderService {
 
-    private final OrderRowRepository orders;
-
-    private final StockService stock;
-
     private final OrderRepository orderRepository;
 
     private final StockReservations stockReservations;
 
     private final Clock clock;
 
-    public OrderService(OrderRowRepository orders, StockService stock, OrderRepository orderRepository,
-            StockReservations stockReservations, Clock clock) {
-        this.orders = orders;
-        this.stock = stock;
+    public OrderService(OrderRepository orderRepository, StockReservations stockReservations, Clock clock) {
         this.orderRepository = orderRepository;
         this.stockReservations = stockReservations;
         this.clock = clock;
@@ -100,21 +86,13 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderRow cancel(Long orderId, String reason) {
-        OrderRow order = orders.findById(orderId).orElseThrow();
-        if (order.getStatus() == OrderStatus.SHIPPED) {
-            throw new IllegalStateException("Cannot cancel a shipped order");
+    public void cancel(Long orderId, String reason) {
+        Order order = load(orderId);
+        order.cancel(reason, LocalDate.now(clock));
+        for (OrderLine line : order.lines()) {
+            stockReservations.release(line.sku(), line.quantity());
         }
-        if (order.getStatus() == OrderStatus.CANCELLED) {
-            throw new IllegalStateException("The order is already cancelled");
-        }
-        for (OrderLineRow line : order.getLines()) {
-            stock.release(line.getSku(), line.getQuantity());
-        }
-        order.setStatus(OrderStatus.CANCELLED);
-        order.setCancelledOn(LocalDate.now());
-        order.setCancellationReason(reason);
-        return order;
+        orderRepository.save(order);
     }
 
     private Order load(Long orderId) {
