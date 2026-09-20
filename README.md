@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 3 is in progress. The latest step is "refactor(order): move OrderService to the application layer". OrderService moves to order.application with an API made of domain types, and the controller follows it.
+Part 3 is in progress. The latest step is "test(order): cover the use cases without a context". OrderServiceTest runs the use cases on the in-memory adapters without a Spring context. The Spring-booted rule tests continue as OrderFlowTest.
 
 The earlier steps of this part:
 
@@ -35,6 +35,7 @@ The earlier steps of this part:
 - refactor(order): route pay through the aggregate
 - refactor(order): route ship through the aggregate
 - refactor(order): route cancel through the aggregate
+- refactor(order): move OrderService to the application layer
 
 ## Run it
 
