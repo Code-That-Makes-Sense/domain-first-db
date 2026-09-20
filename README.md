@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 3 is in progress. The latest step is "fix(returns): make each use case one unit of work". Each ReturnService use case runs in one transaction.
+Part 3 is in progress. The latest step is "feat(order): contract the schema". V9 drops the columns the domain never asked for.
 
 The earlier steps of this part:
 
@@ -37,6 +37,7 @@ The earlier steps of this part:
 - refactor(order): route cancel through the aggregate
 - refactor(order): move OrderService to the application layer
 - test(order): cover the use cases without a context
+- fix(returns): make each use case one unit of work
 
 ## Run it
 
