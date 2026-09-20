@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 3 is in progress. The latest step is "refactor(order): route ship through the aggregate". ship() goes through the aggregate. The row-based helper methods leave the service.
+Part 3 is in progress. The latest step is "refactor(order): route cancel through the aggregate". cancel() goes through the aggregate. The service has no legacy dependency left.
 
 The earlier steps of this part:
 
@@ -33,6 +33,7 @@ The earlier steps of this part:
 - feat(order): reserve stock through the legacy stock module
 - refactor(order): route place through the aggregate
 - refactor(order): route pay through the aggregate
+- refactor(order): route ship through the aggregate
 
 ## Run it
 
