@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 3 is in progress. The latest step is "test(order): cover the use cases without a context". OrderServiceTest runs the use cases on the in-memory adapters without a Spring context. The Spring-booted rule tests continue as OrderFlowTest.
+Part 3 is in progress. The latest step is "fix(returns): make each use case one unit of work". Each ReturnService use case runs in one transaction.
 
 The earlier steps of this part:
 
@@ -36,6 +36,7 @@ The earlier steps of this part:
 - refactor(order): route ship through the aggregate
 - refactor(order): route cancel through the aggregate
 - refactor(order): move OrderService to the application layer
+- test(order): cover the use cases without a context
 
 ## Run it
 
