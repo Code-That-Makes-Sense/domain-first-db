@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 3 is in progress. The latest step is "feat(order): contract the schema". V9 drops the columns the domain never asked for.
+Part 3 is complete. The latest step is "fix(order): forbid cancelling a partially shipped order". A partially shipped order can no longer be cancelled. The fix is one condition and one test. The migration is complete.
 
 The earlier steps of this part:
 
@@ -38,6 +38,9 @@ The earlier steps of this part:
 - refactor(order): move OrderService to the application layer
 - test(order): cover the use cases without a context
 - fix(returns): make each use case one unit of work
+- feat(order): contract the schema
+
+The tag `part-3` points here.
 
 ## Run it
 
@@ -96,3 +99,4 @@ Fork the repo and pick one.
 
 - Rewrite `JpaReturnRequestRepository` with `JdbcClient`. The contract test tells you when you are done. The domain does not notice the change.
 - Write a second decorator on the repository port. Timing is a good candidate: log the slow reads. The same contract test tells you when you are done.
+- Strangle the stock module the same way. `StockReservations` and its adapter already exist, so the seam is there. Model `StockItem` from its behavior, route `reserve`, `release` and `consume` one at a time, keep the tests green, and contract the schema last.
