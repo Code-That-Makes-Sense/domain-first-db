@@ -12,6 +12,7 @@ import com.codethatmakessense.shop.order.domain.OrderLine;
 import com.codethatmakessense.shop.order.domain.OrderRepository;
 import com.codethatmakessense.shop.order.domain.StockReservations;
 import com.codethatmakessense.shop.shared.Money;
+import com.codethatmakessense.shop.shared.OrderId;
 import com.codethatmakessense.shop.shared.Quantity;
 import com.codethatmakessense.shop.shared.Sku;
 import com.codethatmakessense.shop.stock.StockService;
@@ -66,15 +67,10 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderRow pay(Long orderId, String paymentReference) {
-        OrderRow order = orders.findById(orderId).orElseThrow();
-        if (order.getStatus() != OrderStatus.PLACED) {
-            throw new IllegalStateException("Only a placed order can be paid");
-        }
-        order.setStatus(OrderStatus.PAID);
-        order.setPaidOn(LocalDate.now());
-        order.setPaymentReference(paymentReference);
-        return order;
+    public void pay(Long orderId, String paymentReference) {
+        Order order = load(orderId);
+        order.pay(paymentReference, LocalDate.now(clock));
+        orderRepository.save(order);
     }
 
     @Transactional
@@ -140,6 +136,10 @@ public class OrderService {
         order.setCancelledOn(LocalDate.now());
         order.setCancellationReason(reason);
         return order;
+    }
+
+    private Order load(Long orderId) {
+        return orderRepository.findById(new OrderId(orderId)).orElseThrow();
     }
 
     public boolean isShippable(OrderRow order) {
