@@ -10,6 +10,8 @@ import com.codethatmakessense.shop.order.domain.CustomerEmail;
 import com.codethatmakessense.shop.order.domain.Order;
 import com.codethatmakessense.shop.order.domain.OrderLine;
 import com.codethatmakessense.shop.order.domain.OrderRepository;
+import com.codethatmakessense.shop.order.domain.Shipment;
+import com.codethatmakessense.shop.order.domain.ShipmentLine;
 import com.codethatmakessense.shop.order.domain.StockReservations;
 import com.codethatmakessense.shop.shared.Money;
 import com.codethatmakessense.shop.shared.OrderId;
@@ -74,50 +76,27 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderRow ship(Long orderId, String carrier, String trackingNumber) {
-        OrderRow order = orders.findById(orderId).orElseThrow();
+    public void ship(Long orderId, String carrier, String trackingNumber) {
+        Order order = load(orderId);
         List<ShipmentRequest> everything = new ArrayList<>();
-        for (OrderLineRow line : order.getLines()) {
-            everything.add(new ShipmentRequest(line.getSku(), line.getQuantity()));
+        for (OrderLine line : order.lines()) {
+            everything.add(new ShipmentRequest(line.sku().value(), line.quantity().value()));
         }
-        return ship(orderId, carrier, trackingNumber, everything);
+        ship(orderId, carrier, trackingNumber, everything);
     }
 
     @Transactional
-    public OrderRow ship(Long orderId, String carrier, String trackingNumber, List<ShipmentRequest> requests) {
-        OrderRow order = orders.findById(orderId).orElseThrow();
-        if (!isShippable(order)) {
-            throw new IllegalStateException("Only a paid order with something left to ship can be shipped");
-        }
-        ShipmentRow shipment = new ShipmentRow();
-        shipment.setOrder(order);
-        shipment.setShippedOn(LocalDate.now());
-        shipment.setCarrier(carrier);
-        shipment.setTrackingNumber(trackingNumber);
+    public void ship(Long orderId, String carrier, String trackingNumber, List<ShipmentRequest> requests) {
+        Order order = load(orderId);
+        List<ShipmentLine> lines = new ArrayList<>();
         for (ShipmentRequest request : requests) {
-            int remaining = remainingToShip(order, request.sku());
-            if (request.quantity() > remaining) {
-                throw new IllegalStateException("Cannot ship more than ordered: " + request.sku());
-            }
-            ShipmentLineRow line = new ShipmentLineRow();
-            line.setShipment(shipment);
-            line.setSku(request.sku());
-            line.setQuantity(request.quantity());
-            shipment.getLines().add(line);
-            stock.consume(request.sku(), request.quantity());
+            lines.add(new ShipmentLine(new Sku(request.sku()), new Quantity(request.quantity())));
         }
-        order.getShipments().add(shipment);
-        if (order.getShippedOn() == null) {
-            order.setShippedOn(shipment.getShippedOn());
-            order.setCarrier(carrier);
-            order.setTrackingNumber(trackingNumber);
+        Shipment shipment = order.ship(lines, carrier, trackingNumber, LocalDate.now(clock));
+        for (ShipmentLine line : shipment.lines()) {
+            stockReservations.consume(line.sku(), line.quantity());
         }
-        if (isFullyShipped(order)) {
-            order.setStatus(OrderStatus.SHIPPED);
-        } else {
-            order.setStatus(OrderStatus.PARTIALLY_SHIPPED);
-        }
-        return order;
+        orderRepository.save(order);
     }
 
     @Transactional
@@ -140,38 +119,5 @@ public class OrderService {
 
     private Order load(Long orderId) {
         return orderRepository.findById(new OrderId(orderId)).orElseThrow();
-    }
-
-    public boolean isShippable(OrderRow order) {
-        boolean paidOrPartial = order.getStatus() == OrderStatus.PAID
-                || order.getStatus() == OrderStatus.PARTIALLY_SHIPPED;
-        return paidOrPartial && !isFullyShipped(order);
-    }
-
-    public boolean isFullyShipped(OrderRow order) {
-        for (OrderLineRow line : order.getLines()) {
-            if (remainingToShip(order, line.getSku()) > 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private int remainingToShip(OrderRow order, String sku) {
-        int ordered = 0;
-        for (OrderLineRow line : order.getLines()) {
-            if (line.getSku().equals(sku)) {
-                ordered += line.getQuantity();
-            }
-        }
-        int shipped = 0;
-        for (ShipmentRow shipment : order.getShipments()) {
-            for (ShipmentLineRow line : shipment.getLines()) {
-                if (line.getSku().equals(sku)) {
-                    shipped += line.getQuantity();
-                }
-            }
-        }
-        return ordered - shipped;
     }
 }

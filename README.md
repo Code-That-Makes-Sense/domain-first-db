@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 3 is in progress. The latest step is "refactor(order): route pay through the aggregate". pay() goes through the aggregate.
+Part 3 is in progress. The latest step is "refactor(order): route ship through the aggregate". ship() goes through the aggregate. The row-based helper methods leave the service.
 
 The earlier steps of this part:
 
@@ -32,6 +32,7 @@ The earlier steps of this part:
 - feat(order): persist the aggregate onto the legacy tables
 - feat(order): reserve stock through the legacy stock module
 - refactor(order): route place through the aggregate
+- refactor(order): route pay through the aggregate
 
 ## Run it
 

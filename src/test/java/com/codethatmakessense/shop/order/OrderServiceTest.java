@@ -1,6 +1,8 @@
 package com.codethatmakessense.shop.order;
 
+import com.codethatmakessense.shop.order.domain.OrderRepository;
 import com.codethatmakessense.shop.order.domain.OrderStatus;
+import com.codethatmakessense.shop.shared.OrderId;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -27,6 +29,9 @@ class OrderServiceTest {
 
     @Autowired
     StockService stock;
+
+    @Autowired
+    OrderRepository orderRepository;
 
     @BeforeEach
     void stockTheShelves() {
@@ -158,7 +163,7 @@ class OrderServiceTest {
         OrderRow stored = orders.findById(placed).orElseThrow();
         assertThat(stored.getStatus()).isEqualTo(OrderStatus.PARTIALLY_SHIPPED);
         assertThat(stored.getShipments()).hasSize(1);
-        assertThat(orderService.isShippable(stored)).isTrue();
+        assertThat(orderRepository.findById(new OrderId(placed)).orElseThrow().isShippable()).isTrue();
 
         orderService.ship(placed, "DHL", "TRACK-2",
                 List.of(new ShipmentRequest("MUG-7", 1)));
