@@ -1,14 +1,20 @@
 package com.codethatmakessense.shop.order;
 
-import com.codethatmakessense.shop.order.domain.OrderRepository;
-import com.codethatmakessense.shop.order.domain.OrderStatus;
-import com.codethatmakessense.shop.shared.OrderId;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.codethatmakessense.shop.order.adapter.jpa.OrderRow;
 import com.codethatmakessense.shop.order.adapter.jpa.OrderRowRepository;
-
+import com.codethatmakessense.shop.order.application.OrderService;
+import com.codethatmakessense.shop.order.domain.CustomerEmail;
+import com.codethatmakessense.shop.order.domain.OrderLine;
+import com.codethatmakessense.shop.order.domain.OrderRepository;
+import com.codethatmakessense.shop.order.domain.OrderStatus;
+import com.codethatmakessense.shop.order.domain.ShipmentLine;
+import com.codethatmakessense.shop.shared.Money;
+import com.codethatmakessense.shop.shared.OrderId;
+import com.codethatmakessense.shop.shared.Quantity;
+import com.codethatmakessense.shop.shared.Sku;
 import com.codethatmakessense.shop.stock.StockService;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class OrderServiceTest {
 
+    static final Sku BOOK = new Sku("BOOK-1");
+    static final Sku MUG = new Sku("MUG-7");
+    static final CustomerEmail VIKTOR = new CustomerEmail("viktor@example.com");
+
     @Autowired
     OrderService orderService;
 
@@ -28,10 +38,10 @@ class OrderServiceTest {
     OrderRowRepository orders;
 
     @Autowired
-    StockService stock;
+    OrderRepository orderRepository;
 
     @Autowired
-    OrderRepository orderRepository;
+    StockService stock;
 
     @BeforeEach
     void stockTheShelves() {
@@ -41,11 +51,9 @@ class OrderServiceTest {
 
     @Test
     void placesAnOrderWithItsLinesAndTotal() {
-        Long placed = orderService.place("viktor@example.com", List.of(
-                new LineRequest("BOOK-1", 2, 1_500),
-                new LineRequest("MUG-7", 1, 900)));
+        OrderId placed = place();
 
-        OrderRow stored = orders.findById(placed).orElseThrow();
+        OrderRow stored = orders.findById(placed.value()).orElseThrow();
         assertThat(stored.getStatus()).isEqualTo(OrderStatus.PLACED);
         assertThat(stored.getLines()).hasSize(2);
         assertThat(stored.getTotalCents()).isEqualTo(3_900);
@@ -53,11 +61,11 @@ class OrderServiceTest {
 
     @Test
     void paysAPlacedOrder() {
-        Long placed = place();
+        OrderId placed = place();
 
         orderService.pay(placed, "PAY-42");
 
-        OrderRow stored = orders.findById(placed).orElseThrow();
+        OrderRow stored = orders.findById(placed.value()).orElseThrow();
         assertThat(stored.getStatus()).isEqualTo(OrderStatus.PAID);
         assertThat(stored.getPaidOn()).isNotNull();
         assertThat(stored.getPaymentReference()).isEqualTo("PAY-42");
@@ -65,7 +73,7 @@ class OrderServiceTest {
 
     @Test
     void refusesToPayTwice() {
-        Long placed = place();
+        OrderId placed = place();
         orderService.pay(placed, "PAY-42");
 
         assertThatThrownBy(() -> orderService.pay(placed, "PAY-43"))
@@ -74,12 +82,12 @@ class OrderServiceTest {
 
     @Test
     void shipsAPaidOrder() {
-        Long placed = place();
+        OrderId placed = place();
         orderService.pay(placed, "PAY-42");
 
         orderService.ship(placed, "DHL", "TRACK-1");
 
-        OrderRow stored = orders.findById(placed).orElseThrow();
+        OrderRow stored = orders.findById(placed.value()).orElseThrow();
         assertThat(stored.getStatus()).isEqualTo(OrderStatus.SHIPPED);
         assertThat(stored.getShippedOn()).isNotNull();
         assertThat(stored.getTrackingNumber()).isEqualTo("TRACK-1");
@@ -87,7 +95,7 @@ class OrderServiceTest {
 
     @Test
     void refusesToShipAnUnpaidOrder() {
-        Long placed = place();
+        OrderId placed = place();
 
         assertThatThrownBy(() -> orderService.ship(placed, "DHL", "TRACK-1"))
                 .isInstanceOf(IllegalStateException.class);
@@ -95,12 +103,12 @@ class OrderServiceTest {
 
     @Test
     void cancelsAnUnshippedOrder() {
-        Long placed = place();
+        OrderId placed = place();
         orderService.pay(placed, "PAY-42");
 
         orderService.cancel(placed, "changed my mind");
 
-        OrderRow stored = orders.findById(placed).orElseThrow();
+        OrderRow stored = orders.findById(placed.value()).orElseThrow();
         assertThat(stored.getStatus()).isEqualTo(OrderStatus.CANCELLED);
         assertThat(stored.getCancelledOn()).isNotNull();
         assertThat(stored.getCancellationReason()).isEqualTo("changed my mind");
@@ -108,7 +116,7 @@ class OrderServiceTest {
 
     @Test
     void refusesToCancelAShippedOrder() {
-        Long placed = place();
+        OrderId placed = place();
         orderService.pay(placed, "PAY-42");
         orderService.ship(placed, "DHL", "TRACK-1");
 
@@ -118,7 +126,7 @@ class OrderServiceTest {
 
     @Test
     void reservesStockWhenPlacingAndReleasesItWhenCancelling() {
-        Long placed = place();
+        OrderId placed = place();
         assertThat(stock.available("BOOK-1")).isEqualTo(8);
 
         orderService.cancel(placed, "changed my mind");
@@ -128,7 +136,7 @@ class OrderServiceTest {
 
     @Test
     void consumesStockWhenShipping() {
-        Long placed = place();
+        OrderId placed = place();
         orderService.pay(placed, "PAY-42");
 
         orderService.ship(placed, "DHL", "TRACK-1");
@@ -138,35 +146,33 @@ class OrderServiceTest {
 
     @Test
     void refusesAnOrderTheStockCannotCover() {
-        assertThatThrownBy(() -> orderService.place("viktor@example.com",
-                List.of(new LineRequest("MUG-7", 6, 900))))
+        assertThatThrownBy(() -> orderService.place(VIKTOR,
+                List.of(new OrderLine(MUG, new Quantity(6), new Money(900))), false))
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void remembersGiftWrapping() {
-        Long placed = orderService.place("viktor@example.com",
-                List.of(new LineRequest("BOOK-1", 1, 1_500)), true, "Happy reading");
+        OrderId placed = orderService.place(VIKTOR,
+                List.of(new OrderLine(BOOK, new Quantity(1), new Money(1_500))), true);
 
-        OrderRow stored = orders.findById(placed).orElseThrow();
+        OrderRow stored = orders.findById(placed.value()).orElseThrow();
         assertThat(stored.isGiftWrap()).isTrue();
     }
 
     @Test
     void shipsPartOfAnOrderAndKeepsTheRestOpen() {
-        Long placed = place();
+        OrderId placed = place();
         orderService.pay(placed, "PAY-42");
 
-        orderService.ship(placed, "DHL", "TRACK-1",
-                List.of(new ShipmentRequest("BOOK-1", 2)));
+        orderService.ship(placed, "DHL", "TRACK-1", List.of(new ShipmentLine(BOOK, new Quantity(2))));
 
-        OrderRow stored = orders.findById(placed).orElseThrow();
+        OrderRow stored = orders.findById(placed.value()).orElseThrow();
         assertThat(stored.getStatus()).isEqualTo(OrderStatus.PARTIALLY_SHIPPED);
         assertThat(stored.getShipments()).hasSize(1);
-        assertThat(orderRepository.findById(new OrderId(placed)).orElseThrow().isShippable()).isTrue();
+        assertThat(orderRepository.findById(placed).orElseThrow().isShippable()).isTrue();
 
-        orderService.ship(placed, "DHL", "TRACK-2",
-                List.of(new ShipmentRequest("MUG-7", 1)));
+        orderService.ship(placed, "DHL", "TRACK-2", List.of(new ShipmentLine(MUG, new Quantity(1))));
 
         assertThat(stored.getStatus()).isEqualTo(OrderStatus.SHIPPED);
         assertThat(stored.getShipments()).hasSize(2);
@@ -175,30 +181,29 @@ class OrderServiceTest {
 
     @Test
     void refusesToShipMoreThanOrdered() {
-        Long placed = place();
+        OrderId placed = place();
         orderService.pay(placed, "PAY-42");
 
         assertThatThrownBy(() -> orderService.ship(placed, "DHL", "TRACK-1",
-                List.of(new ShipmentRequest("BOOK-1", 3))))
+                List.of(new ShipmentLine(BOOK, new Quantity(3)))))
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void rejectsAnOrderWithoutLines() {
-        assertThatThrownBy(() -> orderService.place("viktor@example.com", List.of()))
+        assertThatThrownBy(() -> orderService.place(VIKTOR, List.of(), false))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void rejectsANonPositiveQuantity() {
-        assertThatThrownBy(() -> orderService.place("viktor@example.com",
-                List.of(new LineRequest("BOOK-1", 0, 1_500))))
+        assertThatThrownBy(() -> new OrderLine(BOOK, new Quantity(0), new Money(1_500)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    private Long place() {
-        return orderService.place("viktor@example.com", List.of(
-                new LineRequest("BOOK-1", 2, 1_500),
-                new LineRequest("MUG-7", 1, 900)));
+    private OrderId place() {
+        return orderService.place(VIKTOR, List.of(
+                new OrderLine(BOOK, new Quantity(2), new Money(1_500)),
+                new OrderLine(MUG, new Quantity(1), new Money(900))), false);
     }
 }

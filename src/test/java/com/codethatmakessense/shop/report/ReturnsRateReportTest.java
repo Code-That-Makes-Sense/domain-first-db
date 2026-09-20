@@ -3,8 +3,11 @@ package com.codethatmakessense.shop.report;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
-import com.codethatmakessense.shop.order.LineRequest;
-import com.codethatmakessense.shop.order.OrderService;
+import com.codethatmakessense.shop.order.application.OrderService;
+import com.codethatmakessense.shop.order.domain.CustomerEmail;
+import com.codethatmakessense.shop.order.domain.OrderLine;
+import com.codethatmakessense.shop.shared.Money;
+import com.codethatmakessense.shop.shared.Quantity;
 import com.codethatmakessense.shop.returns.application.ReturnService;
 import com.codethatmakessense.shop.shared.OrderId;
 import com.codethatmakessense.shop.shared.Quantity;
@@ -39,10 +42,11 @@ class ReturnsRateReportTest {
     @Test
     void relatesWhatCameBackToWhatShipped() {
         stock.receive("BOOK-1", 10);
-        Long orderId = orderService.place("viktor@example.com", List.of(new LineRequest("BOOK-1", 4, 1_500)));
+        OrderId orderId = orderService.place(new CustomerEmail("viktor@example.com"),
+                List.of(new OrderLine(new Sku("BOOK-1"), new Quantity(4), new Money(1_500))), false);
         orderService.pay(orderId, "PAY-42");
         orderService.ship(orderId, "DHL", "TRACK-1");
-        returns.request(new OrderId(orderId), new Sku("BOOK-1"), new Quantity(1));
+        returns.request(orderId, new Sku("BOOK-1"), new Quantity(1));
         entityManager.flush();
 
         List<ReturnsRate> rates = report.bySku();
