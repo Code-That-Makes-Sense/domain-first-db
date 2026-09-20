@@ -39,8 +39,8 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, Object> place(@RequestBody PlaceOrderBody body) {
-        var placed = orderService.place(body.customerEmail(), body.lines(), body.giftWrap(), body.giftMessage());
-        return Map.of("id", placed.getId());
+        Long placed = orderService.place(body.customerEmail(), body.lines(), body.giftWrap(), body.giftMessage());
+        return Map.of("id", placed);
     }
 
     @PostMapping("/{id}/payment")

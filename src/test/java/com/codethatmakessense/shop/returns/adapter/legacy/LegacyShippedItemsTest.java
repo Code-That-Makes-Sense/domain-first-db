@@ -3,7 +3,6 @@ package com.codethatmakessense.shop.returns.adapter.legacy;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codethatmakessense.shop.order.LineRequest;
-import com.codethatmakessense.shop.order.adapter.jpa.OrderRow;
 import com.codethatmakessense.shop.order.OrderService;
 import com.codethatmakessense.shop.order.ShipmentRequest;
 import com.codethatmakessense.shop.shared.Money;
@@ -36,15 +35,15 @@ class LegacyShippedItemsTest {
     void reportsWhatShippedAcrossShipmentsAndNothingForTheRest() {
         stock.receive("BOOK-1", 10);
         stock.receive("MUG-7", 5);
-        OrderRow order = orderService.place("viktor@example.com", List.of(
+        Long orderId = orderService.place("viktor@example.com", List.of(
                 new LineRequest("BOOK-1", 3, 1_500),
                 new LineRequest("MUG-7", 1, 900)));
-        orderService.pay(order.getId(), "PAY-42");
-        orderService.ship(order.getId(), "DHL", "TRACK-1", List.of(new ShipmentRequest("BOOK-1", 1)));
-        orderService.ship(order.getId(), "DHL", "TRACK-2", List.of(new ShipmentRequest("BOOK-1", 2)));
+        orderService.pay(orderId, "PAY-42");
+        orderService.ship(orderId, "DHL", "TRACK-1", List.of(new ShipmentRequest("BOOK-1", 1)));
+        orderService.ship(orderId, "DHL", "TRACK-2", List.of(new ShipmentRequest("BOOK-1", 2)));
 
-        Optional<ShippedItem> books = shippedItems.shippedItem(new OrderId(order.getId()), new Sku("BOOK-1"));
-        Optional<ShippedItem> mugs = shippedItems.shippedItem(new OrderId(order.getId()), new Sku("MUG-7"));
+        Optional<ShippedItem> books = shippedItems.shippedItem(new OrderId(orderId), new Sku("BOOK-1"));
+        Optional<ShippedItem> mugs = shippedItems.shippedItem(new OrderId(orderId), new Sku("MUG-7"));
 
         assertThat(books).isPresent();
         assertThat(books.get().quantity()).isEqualTo(new Quantity(3));

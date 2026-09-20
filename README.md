@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 3 is in progress. The latest step is "feat(order): reserve stock through the legacy stock module". LegacyStockReservations adapts the StockReservations port onto StockService.
+Part 3 is in progress. The latest step is "refactor(order): route place through the aggregate". place() goes through the aggregate. pay, ship and cancel still run the legacy code on the same rows.
 
 The earlier steps of this part:
 
@@ -30,6 +30,7 @@ The earlier steps of this part:
 - refactor(order): move the status enum into the domain
 - refactor(order): draw order ids from the sequence explicitly
 - feat(order): persist the aggregate onto the legacy tables
+- feat(order): reserve stock through the legacy stock module
 
 ## Run it
 
