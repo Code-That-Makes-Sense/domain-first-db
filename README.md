@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 3 is in progress. The latest step is "feat(order): persist the aggregate onto the legacy tables". JpaOrderRepository maps the aggregate onto the legacy rows and passes the contract test.
+Part 3 is in progress. The latest step is "feat(order): reserve stock through the legacy stock module". LegacyStockReservations adapts the StockReservations port onto StockService.
 
 The earlier steps of this part:
 
@@ -29,6 +29,7 @@ The earlier steps of this part:
 - feat(order): let the domain own its ports
 - refactor(order): move the status enum into the domain
 - refactor(order): draw order ids from the sequence explicitly
+- feat(order): persist the aggregate onto the legacy tables
 
 ## Run it
 
@@ -61,7 +62,8 @@ com.codethatmakessense.shop
 ├── order             the legacy service, routed to the aggregate method by method
 │   ├── domain        the Order aggregate, the value objects, and the ports
 │   └── adapter
-│       └── jpa       the rows and the JPA adapter
+│       ├── jpa       the rows and the JPA adapter
+│       └── legacy    the StockReservations adapter over the legacy stock module
 ├── returns           the Spring configuration of the module
 │   ├── domain        the ReturnRequest aggregate and the ports
 │   ├── application   ReturnService
