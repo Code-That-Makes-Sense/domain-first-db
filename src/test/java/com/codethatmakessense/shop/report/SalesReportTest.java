@@ -2,8 +2,13 @@ package com.codethatmakessense.shop.report;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.codethatmakessense.shop.order.LineRequest;
-import com.codethatmakessense.shop.order.OrderService;
+import com.codethatmakessense.shop.order.application.OrderService;
+import com.codethatmakessense.shop.order.domain.CustomerEmail;
+import com.codethatmakessense.shop.order.domain.OrderLine;
+import com.codethatmakessense.shop.shared.Money;
+import com.codethatmakessense.shop.shared.Quantity;
+import com.codethatmakessense.shop.shared.OrderId;
+import com.codethatmakessense.shop.shared.Sku;
 import com.codethatmakessense.shop.stock.StockService;
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -31,9 +36,9 @@ class SalesReportTest {
     @Test
     void sumsTheOrdersOfADayAndSkipsCancelledOnes() {
         stock.receive("BOOK-1", 10);
-        orderService.place("a@example.com", List.of(new LineRequest("BOOK-1", 1, 1_500)));
-        orderService.place("b@example.com", List.of(new LineRequest("BOOK-1", 2, 1_500)));
-        Long cancelled = orderService.place("c@example.com", List.of(new LineRequest("BOOK-1", 1, 1_500)));
+        orderService.place(new CustomerEmail("a@example.com"), books(1), false);
+        orderService.place(new CustomerEmail("b@example.com"), books(2), false);
+        OrderId cancelled = orderService.place(new CustomerEmail("c@example.com"), books(1), false);
         orderService.cancel(cancelled, "changed my mind");
         entityManager.flush();
 
@@ -42,5 +47,9 @@ class SalesReportTest {
         assertThat(sales).hasSize(1);
         assertThat(sales.getFirst().orderCount()).isEqualTo(2);
         assertThat(sales.getFirst().totalCents()).isEqualTo(4_500);
+    }
+
+    private static List<OrderLine> books(int quantity) {
+        return List.of(new OrderLine(new Sku("BOOK-1"), new Quantity(quantity), new Money(1_500)));
     }
 }

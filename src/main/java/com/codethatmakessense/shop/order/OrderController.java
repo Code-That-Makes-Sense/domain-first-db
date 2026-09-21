@@ -1,9 +1,18 @@
 package com.codethatmakessense.shop.order;
 
+import com.codethatmakessense.shop.order.application.OrderService;
+import com.codethatmakessense.shop.order.domain.CustomerEmail;
+import com.codethatmakessense.shop.order.domain.Order;
+import com.codethatmakessense.shop.order.domain.OrderLine;
+import com.codethatmakessense.shop.order.domain.OrderRepository;
+import com.codethatmakessense.shop.order.domain.ShipmentLine;
+import com.codethatmakessense.shop.shared.Money;
+import com.codethatmakessense.shop.shared.OrderId;
+import com.codethatmakessense.shop.shared.Quantity;
+import com.codethatmakessense.shop.shared.Sku;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,20 +26,26 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderController {
 
     private final OrderService orderService;
-    private final JdbcClient jdbc;
+    private final OrderRepository orders;
 
-    public OrderController(OrderService orderService, JdbcClient jdbc) {
+    public OrderController(OrderService orderService, OrderRepository orders) {
         this.orderService = orderService;
-        this.jdbc = jdbc;
+        this.orders = orders;
     }
 
-    public record PlaceOrderBody(String customerEmail, List<LineRequest> lines, boolean giftWrap, String giftMessage) {
+    public record LineBody(String sku, int quantity, long unitPriceCents) {
+    }
+
+    public record PlaceOrderBody(String customerEmail, List<LineBody> lines, boolean giftWrap, String giftMessage) {
     }
 
     public record PaymentBody(String reference) {
     }
 
-    public record ShipmentBody(String carrier, String trackingNumber, List<ShipmentRequest> lines) {
+    public record ShipmentLineBody(String sku, int quantity) {
+    }
+
+    public record ShipmentBody(String carrier, String trackingNumber, List<ShipmentLineBody> lines) {
     }
 
     public record CancellationBody(String reason) {
@@ -39,44 +54,49 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, Object> place(@RequestBody PlaceOrderBody body) {
-        Long placed = orderService.place(body.customerEmail(), body.lines(), body.giftWrap(), body.giftMessage());
-        return Map.of("id", placed);
+        List<OrderLine> lines = body.lines().stream()
+                .map(line -> new OrderLine(new Sku(line.sku()), new Quantity(line.quantity()), new Money(line.unitPriceCents())))
+                .toList();
+        OrderId id = orderService.place(new CustomerEmail(body.customerEmail()), lines, body.giftWrap());
+        return Map.of("id", id.value());
     }
 
     @PostMapping("/{id}/payment")
-    public Map<String, Object> pay(@PathVariable Long id, @RequestBody PaymentBody body) {
-        orderService.pay(id, body.reference());
+    public Map<String, Object> pay(@PathVariable long id, @RequestBody PaymentBody body) {
+        orderService.pay(new OrderId(id), body.reference());
         return get(id);
     }
 
     @PostMapping("/{id}/shipments")
-    public Map<String, Object> ship(@PathVariable Long id, @RequestBody ShipmentBody body) {
+    public Map<String, Object> ship(@PathVariable long id, @RequestBody ShipmentBody body) {
         if (body.lines() == null || body.lines().isEmpty()) {
-            orderService.ship(id, body.carrier(), body.trackingNumber());
+            orderService.ship(new OrderId(id), body.carrier(), body.trackingNumber());
         } else {
-            orderService.ship(id, body.carrier(), body.trackingNumber(), body.lines());
+            List<ShipmentLine> lines = body.lines().stream()
+                    .map(line -> new ShipmentLine(new Sku(line.sku()), new Quantity(line.quantity())))
+                    .toList();
+            orderService.ship(new OrderId(id), body.carrier(), body.trackingNumber(), lines);
         }
         return get(id);
     }
 
     @PostMapping("/{id}/cancellation")
-    public Map<String, Object> cancel(@PathVariable Long id, @RequestBody CancellationBody body) {
-        orderService.cancel(id, body.reason());
+    public Map<String, Object> cancel(@PathVariable long id, @RequestBody CancellationBody body) {
+        orderService.cancel(new OrderId(id), body.reason());
         return get(id);
     }
 
     @GetMapping("/{id}")
-    public Map<String, Object> get(@PathVariable Long id) {
-        Map<String, Object> order = jdbc.sql("SELECT id, customer_email, status, total_cents FROM orders WHERE id = ?")
-                .param(id).query().listOfRows().stream().findFirst().orElseThrow();
-        List<Map<String, Object>> lines = jdbc.sql(
-                "SELECT sku, quantity, unit_price_cents FROM order_lines WHERE order_id = ? ORDER BY id")
-                .param(id).query().listOfRows();
+    public Map<String, Object> get(@PathVariable long id) {
+        Order order = orders.findById(new OrderId(id)).orElseThrow();
         return Map.of(
-                "id", order.get("ID"),
-                "customerEmail", order.get("CUSTOMER_EMAIL"),
-                "status", order.get("STATUS"),
-                "totalCents", order.get("TOTAL_CENTS"),
-                "lines", lines);
+                "id", order.id().value(),
+                "customerEmail", order.customer().value(),
+                "status", order.status().name(),
+                "totalCents", order.total().cents(),
+                "lines", order.lines().stream().map(line -> Map.of(
+                        "sku", line.sku().value(), "quantity", line.quantity().value(),
+                        "unitPriceCents", line.unitPrice().cents())).toList(),
+                "shipments", order.shipments().size());
     }
 }

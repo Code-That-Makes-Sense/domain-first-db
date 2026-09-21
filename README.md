@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 3 is in progress. The latest step is "refactor(order): route cancel through the aggregate". cancel() goes through the aggregate. The service has no legacy dependency left.
+Part 3 is in progress. The latest step is "refactor(order): move OrderService to the application layer". OrderService moves to order.application with an API made of domain types, and the controller follows it.
 
 The earlier steps of this part:
 
@@ -34,6 +34,7 @@ The earlier steps of this part:
 - refactor(order): route place through the aggregate
 - refactor(order): route pay through the aggregate
 - refactor(order): route ship through the aggregate
+- refactor(order): route cancel through the aggregate
 
 ## Run it
 
@@ -63,8 +64,9 @@ ijhttp --env-file http/http-client.env.json --env dev http/shop.http http/return
 ```text
 com.codethatmakessense.shop
 ├── shared            Sku, Quantity, Money and OrderId
-├── order             the legacy service, routed to the aggregate method by method
+├── order             the HTTP controller and the Spring configuration
 │   ├── domain        the Order aggregate, the value objects, and the ports
+│   ├── application   OrderService: load, call the aggregate, save
 │   └── adapter
 │       ├── jpa       the rows and the JPA adapter
 │       └── legacy    the StockReservations adapter over the legacy stock module

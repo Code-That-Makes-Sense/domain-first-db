@@ -2,9 +2,12 @@ package com.codethatmakessense.shop.returns.adapter.legacy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.codethatmakessense.shop.order.LineRequest;
-import com.codethatmakessense.shop.order.OrderService;
-import com.codethatmakessense.shop.order.ShipmentRequest;
+import com.codethatmakessense.shop.order.application.OrderService;
+import com.codethatmakessense.shop.order.domain.CustomerEmail;
+import com.codethatmakessense.shop.order.domain.OrderLine;
+import com.codethatmakessense.shop.shared.Money;
+import com.codethatmakessense.shop.shared.Quantity;
+import com.codethatmakessense.shop.order.domain.ShipmentLine;
 import com.codethatmakessense.shop.shared.Money;
 import com.codethatmakessense.shop.shared.OrderId;
 import com.codethatmakessense.shop.shared.Quantity;
@@ -35,15 +38,16 @@ class LegacyShippedItemsTest {
     void reportsWhatShippedAcrossShipmentsAndNothingForTheRest() {
         stock.receive("BOOK-1", 10);
         stock.receive("MUG-7", 5);
-        Long orderId = orderService.place("viktor@example.com", List.of(
-                new LineRequest("BOOK-1", 3, 1_500),
-                new LineRequest("MUG-7", 1, 900)));
+        Sku book = new Sku("BOOK-1");
+        OrderId orderId = orderService.place(new CustomerEmail("viktor@example.com"), List.of(
+                new OrderLine(book, new Quantity(3), new Money(1_500)),
+                new OrderLine(new Sku("MUG-7"), new Quantity(1), new Money(900))), false);
         orderService.pay(orderId, "PAY-42");
-        orderService.ship(orderId, "DHL", "TRACK-1", List.of(new ShipmentRequest("BOOK-1", 1)));
-        orderService.ship(orderId, "DHL", "TRACK-2", List.of(new ShipmentRequest("BOOK-1", 2)));
+        orderService.ship(orderId, "DHL", "TRACK-1", List.of(new ShipmentLine(book, new Quantity(1))));
+        orderService.ship(orderId, "DHL", "TRACK-2", List.of(new ShipmentLine(book, new Quantity(2))));
 
-        Optional<ShippedItem> books = shippedItems.shippedItem(new OrderId(orderId), new Sku("BOOK-1"));
-        Optional<ShippedItem> mugs = shippedItems.shippedItem(new OrderId(orderId), new Sku("MUG-7"));
+        Optional<ShippedItem> books = shippedItems.shippedItem(orderId, book);
+        Optional<ShippedItem> mugs = shippedItems.shippedItem(orderId, new Sku("MUG-7"));
 
         assertThat(books).isPresent();
         assertThat(books.get().quantity()).isEqualTo(new Quantity(3));
