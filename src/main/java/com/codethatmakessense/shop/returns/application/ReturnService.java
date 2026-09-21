@@ -9,6 +9,7 @@ import com.codethatmakessense.shop.returns.domain.ShippedItems;
 import com.codethatmakessense.shop.shared.OrderId;
 import com.codethatmakessense.shop.shared.Quantity;
 import com.codethatmakessense.shop.shared.Sku;
+import jakarta.transaction.Transactional;
 import java.time.Clock;
 import java.time.LocalDate;
 
@@ -24,6 +25,7 @@ public class ReturnService {
         this.clock = clock;
     }
 
+    @Transactional
     public ReturnId request(OrderId orderId, Sku sku, Quantity quantity) {
         ShippedItem shipped = shippedItems.shippedItem(orderId, sku)
                 .orElseThrow(() -> new ReturnNotAllowed(
@@ -35,24 +37,28 @@ public class ReturnService {
         return request.id();
     }
 
+    @Transactional
     public void approve(ReturnId id) {
         ReturnRequest request = load(id);
         request.approve();
         requests.save(request);
     }
 
+    @Transactional
     public void reject(ReturnId id) {
         ReturnRequest request = load(id);
         request.reject();
         requests.save(request);
     }
 
+    @Transactional
     public void receive(ReturnId id) {
         ReturnRequest request = load(id);
         request.receive();
         requests.save(request);
     }
 
+    @Transactional
     public void refund(ReturnId id) {
         ReturnRequest request = load(id);
         request.refund();
