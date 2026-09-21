@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-class OrderServiceTest {
+class OrderFlowTest {
 
     static final Sku BOOK = new Sku("BOOK-1");
     static final Sku MUG = new Sku("MUG-7");
