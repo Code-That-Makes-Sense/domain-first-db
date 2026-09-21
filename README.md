@@ -10,8 +10,8 @@ builds, and its tests pass. Read it in order.
 
 1. **Part 1, the legacy webshop** (done, tag `part-1`). We build the webshop the way most teams do, database first. The entities mirror the tables, the rules live in services, every feature adds a migration, and every test boots Spring and H2. At the end we expose it over HTTP, so you can try it.
 2. **Part 2, a module built domain-first** (done, tag `part-2`). We add the next feature, returns, the other way round and inside the same application. Behavior comes first, the domain owns its ports, the use cases run on in-memory adapters, and the schema comes last.
-3. **Part 3, the legacy module migrated** (in progress). We strangle the order module onto an aggregate, one method at a time, on the tables it already has. There is no rewrite and no dual write. The schema contracts afterwards.
-4. **Part 4, the tests and the numbers** (not started). We retire the tests that boot the world, turn the architecture into a build rule, split the fast suite from the full one, and measure.
+3. **Part 3, the legacy module migrated** (done, tag `part-3`). We strangle the order module onto an aggregate, one method at a time, on the tables it already has. There is no rewrite and no dual write. The schema contracts afterwards.
+4. **Part 4, the tests and the numbers** (in progress). We retire the tests that boot the world, turn the architecture into a build rule, split the fast suite from the full one, and measure.
 
 Each part ends with a tag, from `part-1` to `part-4`. `git checkout part-2` shows
 the code as the second post leaves it. `git log --oneline part-1..part-2` lists
@@ -19,28 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 3 is complete. The latest step is "fix(order): forbid cancelling a partially shipped order". A partially shipped order can no longer be cancelled. The fix is one condition and one test. The migration is complete.
-
-The earlier steps of this part:
-
-- refactor: lift Sku, Quantity, Money and OrderId into a shared kernel
-- refactor(order): rename the JPA entities to rows
-- feat(order): model the order aggregate from its behavior
-- feat(order): let the domain own its ports
-- refactor(order): move the status enum into the domain
-- refactor(order): draw order ids from the sequence explicitly
-- feat(order): persist the aggregate onto the legacy tables
-- feat(order): reserve stock through the legacy stock module
-- refactor(order): route place through the aggregate
-- refactor(order): route pay through the aggregate
-- refactor(order): route ship through the aggregate
-- refactor(order): route cancel through the aggregate
-- refactor(order): move OrderService to the application layer
-- test(order): cover the use cases without a context
-- fix(returns): make each use case one unit of work
-- feat(order): contract the schema
-
-The tag `part-3` points here.
+Part 4 is in progress. The latest step is "test: retire the rule tests that boot the world". The Spring-booted rule tests are gone. One flow test stays.
 
 ## Run it
 
