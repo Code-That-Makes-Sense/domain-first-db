@@ -3,11 +3,14 @@ package com.codethatmakessense.shop.stock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.codethatmakessense.shop.BootsSpring;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+@BootsSpring
 @SpringBootTest
 @Transactional
 class StockServiceTest {

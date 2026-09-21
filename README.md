@@ -19,11 +19,12 @@ the steps that post walks through.
 
 ## Status
 
-Part 4 is in progress. The latest step is "test: extend the architecture guard to every module". One ArchitectureTest guards the whole application.
+Part 4 is in progress. The latest step is "chore: split the fast suite from the full suite". The @BootsSpring tag and the fastTest task separate the two suites.
 
 The earlier steps of this part:
 
 - test: retire the rule tests that boot the world
+- test: extend the architecture guard to every module
 
 ## Run it
 
@@ -32,6 +33,7 @@ because H2 runs in memory and Flyway creates the schema on start.
 
 ```sh
 ./gradlew test       # everything
+./gradlew fastTest   # the domain, the use cases, the in-memory adapters and the architecture rules
 ./gradlew bootRun    # the shop on port 8080
 ```
 

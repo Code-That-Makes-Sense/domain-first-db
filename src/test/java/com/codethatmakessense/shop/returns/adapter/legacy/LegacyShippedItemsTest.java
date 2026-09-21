@@ -2,6 +2,8 @@ package com.codethatmakessense.shop.returns.adapter.legacy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.codethatmakessense.shop.BootsSpring;
+
 import com.codethatmakessense.shop.order.application.OrderService;
 import com.codethatmakessense.shop.order.domain.CustomerEmail;
 import com.codethatmakessense.shop.order.domain.OrderLine;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+@BootsSpring
 @SpringBootTest
 @Transactional
 class LegacyShippedItemsTest {

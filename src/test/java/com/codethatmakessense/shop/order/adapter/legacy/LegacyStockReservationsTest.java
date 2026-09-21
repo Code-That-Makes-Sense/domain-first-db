@@ -3,6 +3,8 @@ package com.codethatmakessense.shop.order.adapter.legacy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.codethatmakessense.shop.BootsSpring;
+
 import com.codethatmakessense.shop.shared.Quantity;
 import com.codethatmakessense.shop.shared.Sku;
 import com.codethatmakessense.shop.stock.StockService;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+@BootsSpring
 @SpringBootTest
 @Transactional
 class LegacyStockReservationsTest {
