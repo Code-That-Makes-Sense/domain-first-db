@@ -89,8 +89,8 @@ class OrderFlowTest {
 
         OrderRow stored = orders.findById(placed.value()).orElseThrow();
         assertThat(stored.getStatus()).isEqualTo(OrderStatus.SHIPPED);
-        assertThat(stored.getShippedOn()).isNotNull();
-        assertThat(stored.getTrackingNumber()).isEqualTo("TRACK-1");
+        assertThat(stored.getShipments()).hasSize(1);
+        assertThat(stored.getShipments().getFirst().getTrackingNumber()).isEqualTo("TRACK-1");
     }
 
     @Test
@@ -176,7 +176,6 @@ class OrderFlowTest {
 
         assertThat(stored.getStatus()).isEqualTo(OrderStatus.SHIPPED);
         assertThat(stored.getShipments()).hasSize(2);
-        assertThat(stored.getTrackingNumber()).isEqualTo("TRACK-1");
     }
 
     @Test

@@ -43,19 +43,11 @@ public class OrderRow {
 
     private String paymentReference;
 
-    private LocalDate shippedOn;
-
-    private String carrier;
-
-    private String trackingNumber;
-
     private LocalDate cancelledOn;
 
     private String cancellationReason;
 
     private boolean giftWrap;
-
-    private String giftMessage;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderLineRow> lines = new ArrayList<>();
@@ -95,12 +87,6 @@ public class OrderRow {
         List<Shipment> domainShipments = order.shipments();
         for (int i = shipments.size(); i < domainShipments.size(); i++) {
             shipments.add(ShipmentRow.from(this, domainShipments.get(i)));
-        }
-        if (shippedOn == null && !domainShipments.isEmpty()) {
-            Shipment first = domainShipments.getFirst();
-            shippedOn = first.shippedOn();
-            carrier = first.carrier();
-            trackingNumber = first.trackingNumber();
         }
     }
 
@@ -182,30 +168,6 @@ public class OrderRow {
         this.paymentReference = paymentReference;
     }
 
-    public LocalDate getShippedOn() {
-        return shippedOn;
-    }
-
-    public void setShippedOn(LocalDate shippedOn) {
-        this.shippedOn = shippedOn;
-    }
-
-    public String getCarrier() {
-        return carrier;
-    }
-
-    public void setCarrier(String carrier) {
-        this.carrier = carrier;
-    }
-
-    public String getTrackingNumber() {
-        return trackingNumber;
-    }
-
-    public void setTrackingNumber(String trackingNumber) {
-        this.trackingNumber = trackingNumber;
-    }
-
     public LocalDate getCancelledOn() {
         return cancelledOn;
     }
@@ -228,14 +190,6 @@ public class OrderRow {
 
     public void setGiftWrap(boolean giftWrap) {
         this.giftWrap = giftWrap;
-    }
-
-    public String getGiftMessage() {
-        return giftMessage;
-    }
-
-    public void setGiftMessage(String giftMessage) {
-        this.giftMessage = giftMessage;
     }
 
     public List<OrderLineRow> getLines() {
