@@ -100,13 +100,12 @@ class OrderTest {
     }
 
     @Test
-    void stillCancelsAPartiallyShippedOrderLikeTheLegacyCodeDid() {
+    void refusesToCancelAPartiallyShippedOrder() {
         Order order = paid();
         order.ship(List.of(new ShipmentLine(BOOK, new Quantity(2))), "DHL", "T-1", TODAY);
 
-        order.cancel("half of it is gone already", TODAY);
-
-        assertThat(order.status()).isEqualTo(OrderStatus.CANCELLED);
+        assertThatThrownBy(() -> order.cancel("half of it is gone already", TODAY))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     private static Order placed() {

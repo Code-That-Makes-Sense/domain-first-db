@@ -78,8 +78,8 @@ public class Order {
     }
 
     public void cancel(String reason, LocalDate on) {
-        if (status == OrderStatus.SHIPPED) {
-            throw new IllegalStateException("Cannot cancel a shipped order");
+        if (!shipments.isEmpty()) {
+            throw new IllegalStateException("Cannot cancel an order once something shipped");
         }
         if (status == OrderStatus.CANCELLED) {
             throw new IllegalStateException("The order is already cancelled");
