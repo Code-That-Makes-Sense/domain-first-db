@@ -1,0 +1,39 @@
+name: Benchmark
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["part-*"]
+
+permissions:
+  contents: read
+
+jobs:
+  jmh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Run the suite benchmark
+        run: ./gradlew jmh --no-daemon --stacktrace
+
+      - name: Render the report
+        run: ./gradlew benchmarkReport --no-daemon
+
+      - name: Publish the report to the job summary
+        run: cat docs/benchmark.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark
+          path: |
+            build/reports/jmh/results.json
+            docs/benchmark.md

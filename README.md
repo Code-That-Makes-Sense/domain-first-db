@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 4 is in progress. The latest step is "feat: benchmark the suites with JMH". A JMH benchmark measures both suites, hot and cold, and writes docs/benchmark.md.
+Part 4 is in progress. The latest step is "ci: run both suites and the benchmark on GitHub Actions". GitHub Actions run the suites on every push and the benchmark on every part tag.
 
 The earlier steps of this part:
 
@@ -27,6 +27,7 @@ The earlier steps of this part:
 - test: extend the architecture guard to every module
 - chore: split the fast suite from the full suite
 - docs: part-to-tag map and measured scorecard
+- feat: benchmark the suites with JMH
 
 ## Run it
 
@@ -52,6 +53,8 @@ which you get with `brew install ijhttp`:
 ```sh
 ijhttp --env-file http/http-client.env.json --env dev http/shop.http http/returns.http
 ```
+
+CI runs both suites on every push and the benchmark on every `part-*` tag.
 
 ## Layout now
 
