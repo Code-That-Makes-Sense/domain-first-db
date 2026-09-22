@@ -2,6 +2,7 @@ package com.codethatmakessense.shop.returns.adapter.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.codethatmakessense.shop.BootsSpring;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
+@BootsSpring
 @SpringBootTest
 @AutoConfigureMockMvc
 class ReturnsApiTest {

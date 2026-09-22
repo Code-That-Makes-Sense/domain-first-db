@@ -34,3 +34,13 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+val fastTest by tasks.registering(Test::class) {
+    description = "Runs every test that does not boot Spring or touch a database."
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    useJUnitPlatform {
+        excludeTags("boots-spring")
+    }
+}

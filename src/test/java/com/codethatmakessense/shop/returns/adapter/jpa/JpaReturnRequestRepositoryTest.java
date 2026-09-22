@@ -1,5 +1,6 @@
 package com.codethatmakessense.shop.returns.adapter.jpa;
 
+import com.codethatmakessense.shop.BootsSpring;
 import com.codethatmakessense.shop.returns.adapter.ReturnRequestRepositoryContract;
 import com.codethatmakessense.shop.returns.domain.ReturnRequestRepository;
 import com.codethatmakessense.shop.shared.OrderId;
@@ -10,6 +11,7 @@ import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabas
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
+@BootsSpring
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(JpaReturnRequestRepository.class)
