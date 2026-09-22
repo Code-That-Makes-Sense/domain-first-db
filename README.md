@@ -19,7 +19,11 @@ the steps that post walks through.
 
 ## Status
 
-Part 4 is in progress. The latest step is "test: retire the rule tests that boot the world". The Spring-booted rule tests are gone. One flow test stays.
+Part 4 is in progress. The latest step is "test: extend the architecture guard to every module". One ArchitectureTest guards the whole application.
+
+The earlier steps of this part:
+
+- test: retire the rule tests that boot the world
 
 ## Run it
 
