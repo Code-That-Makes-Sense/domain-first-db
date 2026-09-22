@@ -19,7 +19,7 @@ the steps that post walks through.
 
 ## Status
 
-Part 4 is in progress. The latest step is "ci: run both suites and the benchmark on GitHub Actions". GitHub Actions run the suites on every push and the benchmark on every part tag.
+Part 4 is complete. The latest step is "docs: scorecard from the benchmark, and homework". The scorecard comes from the benchmark. The series is complete.
 
 The earlier steps of this part:
 
@@ -28,6 +28,9 @@ The earlier steps of this part:
 - chore: split the fast suite from the full suite
 - docs: part-to-tag map and measured scorecard
 - feat: benchmark the suites with JMH
+- ci: run both suites and the benchmark on GitHub Actions
+
+The tag `part-4` points here.
 
 ## Run it
 
@@ -97,26 +100,33 @@ Fork the repo and pick one.
 
 ## The scorecard
 
-Measured on 2026-10-04 on the author's laptop with Gradle 9.4 and `--no-daemon`,
-one run each, with the classes already compiled. The wall times include the
-Gradle and JVM start-up. The JUnit time is the number that moves.
+The suite times come from JMH through the JUnit Platform Launcher
+(`./gradlew jmh benchmarkReport`, report in [docs/benchmark.md](docs/benchmark.md)).
+Cold means a fresh JVM for every run. Hot means a warmed JVM with the Spring
+context cached, which is what a re-run in the IDE feels like. The other rows
+come from git and from one Gradle run with the classes compiled. Everything was measured on 2026-10-04
+on the author's laptop, and CI runs the same benchmark on every `part-*` tag.
 
-| Measure                              | `part-1`       | `part-4`                     |
-| ------------------------------------ | -------------- | ---------------------------- |
-| Test classes that boot Spring or H2  | 5 of 5         | 12 of 20                     |
-| Tests                                | 20, all booted | 71 total, 49 with no context |
-| JUnit time, tests with no context    | none exist     | 0.41 s for 49 tests          |
-| JUnit time, full suite               | 2.10 s         | 2.86 s                       |
-| Wall time, `./gradlew fastTest`      | no such suite  | 3.7 s                        |
-| Wall time, `./gradlew test`          | 6.0 s          | 6.8 s                        |
-| Files touched by a rule change       | 9              | 3                            |
-| Migrations needed by that change     | 1              | 0                            |
+| Measure                              | `part-1`                 | `part-4`                     |
+| ------------------------------------ | ------------------------ | ---------------------------- |
+| Test classes that boot Spring or H2  | 5 of 5                   | 12 of 20                     |
+| Tests                                | 20, all booted           | 71 total, 49 with no context |
+| Fast suite, cold                     | no such suite            | 564 ms                       |
+| Fast suite, hot                      | no such suite            | 29 ms                        |
+| Booted suite, cold                   | 2 386 ms                 | 3 105 ms                     |
+| Booted suite, hot                    | 25 ms                    | 56 ms                        |
+| JUnit time, full suite               | 2.10 s                   | 2.86 s                       |
+| Wall time, `./gradlew test`          | 6.0 s                    | 6.8 s                        |
+| Files touched by a rule change       | 9                        | 3                            |
+| Migrations needed by that change     | 1                        | 0                            |
 
 The rule change at `part-1` is the partial-shipments commit, the one at `part-4`
-is the cancel fix. Both counts include this README.
+is the cancel fix. Both counts include this README. The `part-1` benchmark
+numbers come from running the `part-4` benchmark harness on a checkout of the
+`part-1` tag, where every test is a booted test.
 
-The full suite did not get faster. It got bigger, because the code now has
-two adapters per port, a contract test for each, and an HTTP layer. What
-changed is where a rule lives and what it costs to check one. A domain rule
-runs in milliseconds with nothing on the classpath, and a rule change no longer
-touches the schema.
+The booted suite is fast once the context is cached. The cost is the cold
+start, about six times the fast suite, and you pay it on every fresh JVM:
+every CI job, every single test you run after a rebuild, and every context
+that a new profile or a new mock invalidates. A rule that only has booted
+tests pays it every time. A rule with a domain test never pays it.
