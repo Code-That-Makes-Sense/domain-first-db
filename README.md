@@ -19,12 +19,13 @@ the steps that post walks through.
 
 ## Status
 
-Part 4 is in progress. The latest step is "chore: split the fast suite from the full suite". The @BootsSpring tag and the fastTest task separate the two suites.
+Part 4 is in progress. The latest step is "docs: part-to-tag map and measured scorecard". The README gets the first scorecard.
 
 The earlier steps of this part:
 
 - test: retire the rule tests that boot the world
 - test: extend the architecture guard to every module
+- chore: split the fast suite from the full suite
 
 ## Run it
 
@@ -85,3 +86,29 @@ Fork the repo and pick one.
 - Rewrite `JpaReturnRequestRepository` with `JdbcClient`. The contract test tells you when you are done. The domain does not notice the change.
 - Write a second decorator on the repository port. Timing is a good candidate: log the slow reads. The same contract test tells you when you are done.
 - Strangle the stock module the same way. `StockReservations` and its adapter already exist, so the seam is there. Model `StockItem` from its behavior, route `reserve`, `release` and `consume` one at a time, keep the tests green, and contract the schema last.
+
+## The scorecard
+
+Measured on 2026-10-04 on the author's laptop with Gradle 9.4 and `--no-daemon`,
+one run each, with the classes already compiled. The wall times include the
+Gradle and JVM start-up. The JUnit time is the number that moves.
+
+| Measure                              | `part-1`       | `part-4`                     |
+| ------------------------------------ | -------------- | ---------------------------- |
+| Test classes that boot Spring or H2  | 5 of 5         | 12 of 20                     |
+| Tests                                | 20, all booted | 71 total, 49 with no context |
+| JUnit time, tests with no context    | none exist     | 0.41 s for 49 tests          |
+| JUnit time, full suite               | 2.10 s         | 2.86 s                       |
+| Wall time, `./gradlew fastTest`      | no such suite  | 3.7 s                        |
+| Wall time, `./gradlew test`          | 6.0 s          | 6.8 s                        |
+| Files touched by a rule change       | 9              | 3                            |
+| Migrations needed by that change     | 1              | 0                            |
+
+The rule change at `part-1` is the partial-shipments commit, the one at `part-4`
+is the cancel fix. Both counts include this README.
+
+The full suite did not get faster. It got bigger, because the code now has
+two adapters per port, a contract test for each, and an HTTP layer. What
+changed is where a rule lives and what it costs to check one. A domain rule
+runs in milliseconds with nothing on the classpath, and a rule change no longer
+touches the schema.
