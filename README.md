@@ -19,13 +19,14 @@ the steps that post walks through.
 
 ## Status
 
-Part 4 is in progress. The latest step is "docs: part-to-tag map and measured scorecard". The README gets the first scorecard.
+Part 4 is in progress. The latest step is "feat: benchmark the suites with JMH". A JMH benchmark measures both suites, hot and cold, and writes docs/benchmark.md.
 
 The earlier steps of this part:
 
 - test: retire the rule tests that boot the world
 - test: extend the architecture guard to every module
 - chore: split the fast suite from the full suite
+- docs: part-to-tag map and measured scorecard
 
 ## Run it
 
@@ -36,6 +37,7 @@ because H2 runs in memory and Flyway creates the schema on start.
 ./gradlew test       # everything
 ./gradlew fastTest   # the domain, the use cases, the in-memory adapters and the architecture rules
 ./gradlew bootRun    # the shop on port 8080
+./gradlew jmh benchmarkReport   # both suites, hot and cold, written to docs/benchmark.md
 ```
 
 With the app running, `http/shop.http` walks an order from stock receipt to
@@ -71,9 +73,12 @@ com.codethatmakessense.shop
 │       ├── cache     the caching decorator
 │       └── web       the HTTP controller
 ├── stock             legacy, used only through the StockReservations port
-└── report            read-only reports
+├── report            read-only reports
+└── bench             the JMH benchmark of the test suites
 
 http/                 the request files for the HTTP Client
+docs/                 the benchmark report
+scripts/              the script that renders the benchmark report
 ```
 
 The domain and application packages import no framework. An ArchUnit test fails

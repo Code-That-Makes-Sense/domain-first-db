@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "4.0.6"
     id("io.spring.dependency-management") version "1.1.7"
+    id("me.champeau.jmh") version "0.7.3"
 }
 
 group = "com.codethatmakessense"
@@ -29,6 +30,23 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-jdbc-test")
     testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    jmhImplementation(sourceSets.test.get().output)
+    jmhImplementation(sourceSets.test.get().runtimeClasspath)
+    jmhImplementation("org.junit.platform:junit-platform-launcher")
+}
+
+jmh {
+    jmhVersion = "1.37"
+    resultFormat = "JSON"
+    resultsFile = layout.buildDirectory.file("reports/jmh/results.json")
+    jvmArgs = listOf("-Djmh.ignoreLock=true")
+}
+
+val benchmarkReport by tasks.registering(Exec::class) {
+    description = "Turns the JMH results into docs/benchmark.md."
+    group = "verification"
+    commandLine("python3", "scripts/benchmark-report.py",
+        layout.buildDirectory.file("reports/jmh/results.json").get().asFile.path, "docs/benchmark.md")
 }
 
 tasks.withType<Test> {
